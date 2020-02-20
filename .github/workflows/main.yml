@@ -20,12 +20,12 @@ jobs:
           toolchain: nightly
           components: rustfmt
 
-      - name: Install stable Rust
+      - name: Install Nightly Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
-
+          toolchain: nightly
+          
       - name: Install cargo-make
         uses: davidB/rust-cargo-make@v1
 
