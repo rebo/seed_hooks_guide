@@ -16,11 +16,11 @@ use seed::{prelude::*, *};
 
 const TITLE_SUFFIX: &str = "seedhooks";
 // https://mailtolink.me/
-const MAIL_TO_REBO: &str = "mailto:rebotfc@gmail.com";
-const USER_AGENT_FOR_PRERENDERING: &str = "ReactSnap";
+// const MAIL_TO_REBO: &str = "mailto:rebotfc@gmail.com";
+// const USER_AGENT_FOR_PRERENDERING: &str = "ReactSnap";
 const STATIC_PATH: &str = "static";
 const IMAGES_PATH: &str = "static/images";
-use once_cell::sync::OnceCell;
+// use once_cell::sync::OnceCell;
 
 #[derive(Debug)]
 pub struct Logger {

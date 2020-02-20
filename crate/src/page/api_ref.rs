@@ -144,33 +144,33 @@ fn section_desc<T: Into<String>>(
     title: T,
     description: T,
 ) -> Vec<Node<Msg>> {
-
     let mut opts = ComrakOptions::default();
     opts.github_pre_lang = true;
 
     let title = markdown_to_html(&title.into(), &opts);
-    let description =
-        markdown_to_html(&description.into(), &opts);
+    let description = markdown_to_html(&description.into(), &opts);
 
-        let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
+    let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
 
-        after_render_once(move |_| {
-            if let Some(desc_el) = desc_el.get().get() {
-                let code_children = desc_el.get_elements_by_tag_name("h3");
+    after_render_once(move |_| {
+        if let Some(desc_el) = desc_el.get().get() {
+            let code_children = desc_el.get_elements_by_tag_name("h3");
 
-                for idx in 0..code_children.length(){
-                    let code_el = code_children.item(idx).unwrap();
-                    code_el.set_class_name("text-xl py-3");
-                }
+            for idx in 0..code_children.length() {
+                let code_el = code_children.item(idx).unwrap();
+                code_el.set_class_name("text-xl py-3");
+            }
 
-                let code_children = desc_el.get_elements_by_tag_name("code");
+            let code_children = desc_el.get_elements_by_tag_name("code");
 
-                for idx in 0..code_children.length(){
-                    let code_el = code_children.item(idx).unwrap();
-                    code_el.set_class_name("language-rust");
-                    highlightElement(code_el.dyn_into::<web_sys::HtmlElement>().unwrap());
-                }
-            }        
+            for idx in 0..code_children.length() {
+                let code_el = code_children.item(idx).unwrap();
+                code_el.set_class_name("language-rust");
+                highlightElement(
+                    code_el.dyn_into::<web_sys::HtmlElement>().unwrap(),
+                );
+            }
+        }
     });
 
     nodes![
@@ -179,7 +179,11 @@ fn section_desc<T: Into<String>>(
             a![attrs![At::Name=>href_name.into()], raw!(&title)]
         ],
         hr![class![C.my_8 C.border_b_2 C.border_gray_200]],
-        div![el_ref(&desc_el.get()), class![C.m_3 C.leading_relaxed], raw!(&description)],
+        div![
+            el_ref(&desc_el.get()),
+            class![C.m_3 C.leading_relaxed],
+            raw!(&description)
+        ],
     ]
 }
 
@@ -202,16 +206,17 @@ fn function_desc<T: Into<String>>(
 
     after_render_once(move |_| {
         if let Some(code_el) = code_el.get().get() {
-
             if let Some(desc_el) = desc_el.get().get() {
                 let code_children = desc_el.get_elements_by_tag_name("code");
 
-                for idx in 0..code_children.length(){
+                for idx in 0..code_children.length() {
                     let code_el = code_children.item(idx).unwrap();
                     code_el.set_class_name("language-rust");
-                    highlightElement(code_el.dyn_into::<web_sys::HtmlElement>().unwrap());
+                    highlightElement(
+                        code_el.dyn_into::<web_sys::HtmlElement>().unwrap(),
+                    );
                 }
-            }        
+            }
 
             highlightElement(code_el);
         }
@@ -223,11 +228,17 @@ fn function_desc<T: Into<String>>(
             a![attrs![At::Name=> href_name], raw!(&title)]
         ],
         if let Some(sig) = signature {
-            pre![class![C.p_4],code![sig]] }
-             else {empty![]},
+            pre![class![C.p_4], code![sig]]
+        } else {
+            empty![]
+        },
         div![
             class![C.flex C.flex_row],
-            div![el_ref(&desc_el.get()),class![C.p_3, C.w_1of2 C.flex_none], raw!(&description)],
+            div![
+                el_ref(&desc_el.get()),
+                class![C.p_3, C.w_1of2 C.flex_none],
+                raw!(&description)
+            ],
             div![
                 class![C.p_3, C.w_1of2 C.flex_none],
                 pre![
@@ -267,7 +278,7 @@ In the above code `name` is an accessor for a local **state variable** which is 
 
 Seed hooks allow 'components' to have their own state and those components can then be freely composed and re-used at will. Due to this they are ideal
 for functionality that does not need to touch the main Seed View->Message->Update->View loop. For instance a dropdown menu toggle, individual input element
-state, or modal dialog visibiility. 
+state, or modal dialog visibiility.
 
 Due to component behaviour being freely composable complex components can be created and re-used such as date pickers which do not need to be wired into the main app.
 
@@ -275,10 +286,10 @@ Due to component behaviour being freely composable complex components can be cre
 
 `use_state` is the principal function to access local state, individual comoponents are identified by annotation with `#[topo::nested]`.
 
-`#[topo::nested]` functions have a unique id which is based on the function's parent call hierarchy, callsite, and an indexed slot. 
+`#[topo::nested]` functions have a unique id which is based on the function's parent call hierarchy, callsite, and an indexed slot.
 This enables topologically aware functions to be considered as unique components with local state.
 
-The only setup required is to ensure the root seed view function directly calls a `#[topo::nested]` function that acts as the root for the call heirachy. 
+The only setup required is to ensure the root seed view function directly calls a `#[topo::nested]` function that acts as the root for the call heirachy.
 The following typically suffices:
 
 ```rust
@@ -309,7 +320,7 @@ impl Default for Msg {
 ```
 This api guide summarises the hooks and functions currently available in two crates:
 
-a. [comp_state](https://github.com/rebo/comp_state)  
+a. [comp_state](https://github.com/rebo/comp_state)
 b. [comp_state_seed_extras](https://github.com/rebo/comp_state_seed_extras)
 
 Only the main functions are described here there are many more for use in specific circumstances, 
