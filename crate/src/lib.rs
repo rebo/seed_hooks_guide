@@ -20,6 +20,12 @@ const MAIL_TO_REBO: &str = "mailto:rebotfc@gmail.com";
 const USER_AGENT_FOR_PRERENDERING: &str = "ReactSnap";
 const STATIC_PATH: &str = "static";
 const IMAGES_PATH: &str = "static/images";
+use once_cell::sync::OnceCell;
+
+#[derive(Debug)]
+pub struct Logger {
+    // ...
+}
 
 // ------ ------
 // Before Mount
@@ -68,6 +74,7 @@ impl From<Url> for Page {
         match url.path.first().map(String::as_str) {
             None | Some("") => Self::Home,
             Some("about") => Self::About,
+            Some("api_ref") => Self::ApiRef,
             _ => Self::NotFound,
         }
     }

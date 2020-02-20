@@ -1,6 +1,6 @@
 // [...range(1,5,2)] => [1,3,5]
 function* range(start, end, step) {
-  if(start > end) return;
+  if (start > end) return;
   yield start;
   yield* range(start + step, end, step);
 };
@@ -28,14 +28,14 @@ module.exports = {
   //     'xl': '1701px',
   //     // => @media (min-width: 1701px) { ... }
   //   },
-  //   fontFamily: {
-  //     display: ['Metropolis', 'sans-serif'],
-  //     body: ['Inter', 'sans-serif'],
-  //     monospace: ['Courier New', 'monospace'],
-  //     ordinary: ['Arial', 'sans-serif'],
-  //     sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial',
-  //         'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji']
-  //   },
+  fontFamily: {
+    display: ['Metropolis', 'sans-serif'],
+    body: ['Inter', 'sans-serif'],
+    monospace: ['Courier New', 'monospace'],
+    ordinary: ['Arial', 'sans-serif'],
+    sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial',
+      'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji']
+  },
   //   fontSize: (() => {
   //     return Object.fromEntries([
   //       ...range(15, 35, 1),

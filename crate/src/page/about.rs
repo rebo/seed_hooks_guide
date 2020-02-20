@@ -1,6 +1,4 @@
-use crate::{
-    asset_path, generated::css_classes::C, image_src, Msg, MAIL_TO_REBO,
-};
+use crate::{generated::css_classes::C, Msg};
 use seed::{prelude::*, *};
 
 #[allow(clippy::too_many_lines)]
