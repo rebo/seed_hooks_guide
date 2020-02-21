@@ -27,98 +27,101 @@ pub fn view() -> Node<Msg> {
 
 fn left_bar_content() -> Node<Msg> {
     div![
-        h1![a![
-            class![C.hover__text_gray_100],
+        class![C.p_3],
+        h1!["API"],
+        hr![class![C.my_8 C.border_b_2 C.border_gray_200]],
+        h2![a![
+            class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
             attrs![At::Href=>"api_ref#start_here"],
             "Start Here"
         ]],
         ul![
             a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#state_functions"],
                 "State Functions"
             ],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#use_state"],
                 "use_state"
             ]],
             li![a![
-                class![C.hover__text_gray_100],
-                attrs![At::Href=>"api_ref#use_state_unique"],
-                "use_state_unique"
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                attrs![At::Href=>"api_ref#new_state"],
+                "new_state"
             ]],
         ],
         ul![
             a![
-                class![C.hover__text_gray_100],
-                attrs![At::Href=>"api_ref#condittional"],
-                "Conditional Execution Functions"
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                attrs![At::Href=>"api_ref#conditional"],
+                "Conditional Execution"
             ],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#do_once"],
                 "do_once"
             ]],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#after_render"],
                 "after_render"
             ]],
         ],
         ul![
             a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#state_access"],
-                "StateAccess<T> Struct"
+                "StateAccess<T>"
             ],
             li![a![
-                class![C.hover__text_gray_100],
-                attrs![At::Href=>"api_ref#use_state"],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                attrs![At::Href=>"api_ref#get"],
                 "get"
             ]],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#get_with"],
                 "get_with"
             ]],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#set"],
                 "set"
             ]],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#update"],
                 "update"
             ]],
-            li![a![
-                class![C.hover__text_gray_100],
-                attrs![At::Href=>"api_ref#use_state"],
-                "changed"
-            ]],
-            li![a![
-                class![C.hover__text_gray_100],
-                attrs![At::Href=>"api_ref#events"],
-                "..events"
-            ]]
+            // li![a![
+            //     class![C.hover__text_gray_100],
+            //     attrs![At::Href=>"api_ref#changed"],
+            //     "changed"
+            // ]],
+            // li![a![
+            //     class![C.hover__text_gray_100],
+            //     attrs![At::Href=>"api_ref#events"],
+            //     "..events"
+            // ]]
         ],
         ul![
-            a![attrs![At::Href=>"api_ref#dx"], "DX Functions"],
+            a![attrs![At::Href=>"api_ref#dx"], "DX"],
             li![a![
-                class![C.hover__text_gray_100],
+                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#bind"],
                 "bind"
             ]],
         ],
-        ul![
-            "Utility Functions",
-            li![a![
-                class![C.hover__text_gray_100],
-                attrs![At::Href=>"api_ref#use_list"],
-                "use_list"
-            ]],
-        ]
+        // ul![
+        //     "Utility Functions",
+        //     li![a![
+        //         class![C.hover__text_gray_100],
+        //         attrs![At::Href=>"api_ref#use_list"],
+        //         "use_list"
+        //     ]],
+        // ]
     ]
 }
 
@@ -290,6 +293,17 @@ fn use_state_example() -> Node<Msg> {
     ] , count.mouse_ev(Ev::Click, |count, _| *count += 1)],
     ]
 }
+#[topo::nested]
+fn numberbind() -> Node<Msg> {
+    let a = use_state(|| 0);
+    let b = use_state(|| 0);
+
+    div![
+        input![attrs![At::Type=>"number"], bind(At::Value, a), class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],],
+        input![attrs![At::Type=>"number"], bind(At::Value, b), class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],],
+        p![format!("{} + {} = {}", a.get(), b.get(), a.get() + b.get())]
+    ]
+}
 
 #[topo::nested]
 fn if_example() -> Node<Msg> {
@@ -315,9 +329,9 @@ fn if_example() -> Node<Msg> {
 
     div![
         "A:",
-        input![bind(At::Value, input_a)],
+        input![bind(At::Value, input_a), class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],],
         "B:",
-        input![bind(At::Value, input_b)],
+        input![bind(At::Value, input_b), class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],],
         ul![id!("list"), "Smallest Log:"],
     ]
 }
@@ -356,7 +370,7 @@ fn do_once_example() -> Node<Msg> {
 }
 
 #[topo::nested]
-fn use_state_unique_example() -> Node<Msg> {
+fn new_state_example() -> Node<Msg> {
     let todos = use_state(|| vec![use_state(String::new)]);
     div![
         todos.get().iter().enumerate().map(|(idx, todo)| {
@@ -449,6 +463,99 @@ fn modal(modal_content: StateAccess<(bool, fn() -> Node<Msg> )>) -> Node<Msg> {
         empty![]
     }
 }
+struct NonCloneString(String);
+
+#[topo::nested]
+fn my_non_clone_input() -> Node<Msg> {
+    let input_access = use_state(|| NonCloneString("".to_string()));
+    let val = input_access.get_with(|v| format!("{}", v.0));
+
+    div![
+        input![attrs![At::Value => val], 
+        class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],
+            input_access.input_ev(Ev::Input, |i,text| *i=NonCloneString(text))
+        ],
+        format!("Text inputted: {}", val)
+    ]
+}
+
+
+#[topo::nested]
+fn update_example() -> Node<Msg> {
+    let count = use_state(|| 3);
+
+    div![
+        button![
+            "-",
+            class![
+                    C.mx_2
+                    C.bg_gray_500,
+                    C.hover__bg_gray_400,
+                    C.text_white,
+                    C.font_bold,
+                    C.py_2,
+                    C.px_2,
+                    C.text_sm,
+                    C.border_b_4,
+                    C.border_gray_600,
+                    C.hover__border_gray_500,
+                    C.rounded_lg
+                ], 
+            mouse_ev(Ev::Click, move |_| {
+                count.update(|v| *v -= 1);
+                Msg::NoOp
+            }),
+        ],
+        count.get().to_string(),
+        button![
+            "+",
+            class![
+                    C.mx_2
+                    C.bg_gray_500,
+                    C.hover__bg_gray_400,
+                    C.text_white,
+                    C.font_bold,
+                    C.py_2,
+                    C.px_2,
+                    C.text_sm,
+                    C.border_b_4,
+                    C.border_gray_600,
+                    C.hover__border_gray_500,
+                    C.rounded_lg
+                ], 
+            mouse_ev(Ev::Click, move |_| {
+                count.update(|v| *v += 1);
+                Msg::NoOp
+            }),
+        ],
+    ]
+}
+
+#[topo::nested]
+fn my_input() -> Node<Msg> {
+    let input_access = use_state(|| "".to_string());
+
+    div![
+        input![attrs![At::Value => input_access.get()], 
+        class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],
+            input_access.input_ev(Ev::Input, |i,text| *i=text)
+        ],
+        format!("Text inputted: {}", input_access.get())
+    ]
+}
+
+#[topo::nested]
+fn set_list() -> Node<Msg> {
+    let selected = use_state(||"");
+
+    ul![ "Selected Item:", selected.get(),
+        li!["1st Item", mouse_ev(Ev::Click, move |_| { selected.set("1"); Msg::default() }), class![C.cursor_pointer]],
+        li!["2nd Item", mouse_ev(Ev::Click, move |_| { selected.set("2"); Msg::default() }), class![C.cursor_pointer]],
+        li!["3rd Item", mouse_ev(Ev::Click, move |_| { selected.set("3"); Msg::default() }), class![C.cursor_pointer]],
+        li!["4th Item", mouse_ev(Ev::Click, move |_| { selected.set("4"); Msg::default() }), class![C.cursor_pointer]],
+        li!["5th Item", mouse_ev(Ev::Click, move |_| { selected.set("5"); Msg::default() }), class![C.cursor_pointer]],
+    ]
+}
 
 fn empty_fn() -> Node<Msg> {
     empty![]
@@ -491,21 +598,7 @@ Due to component behaviour being freely composable complex components can be cre
 `#[topo::nested]` functions have a unique id which is based on the function's parent call hierarchy, callsite, and an indexed slot.
 This enables functions to be topologically aware and therefore considered as unique components with local state.
 
-The only setup required is to ensure the root seed view function directly calls a `#[topo::nested]` function that acts as the root for the call heirachy.
-The following typically suffices:
-
-```rust
-use comp_state::{topo, use_state};
-
-pub fn view(model: &Model) -> impl View<Msg> {
-    root_view(model)
-}
-
-#[topo::nested]
-pub fn root_view(model: &Model) -> Node<Msg> {
-    ...
-}
-```
+The only setup required is to ensure the seed root view is annotated with `#[topo::nested]` this way it acts as a root for all components.
 
 At present if event handlers helpers are to be used then the `Msg` type should also implement a `default()` no-op. This restriction will be lifted eventually:
 
@@ -529,6 +622,53 @@ b. [comp_state_seed_extras](https://github.com/rebo/comp_state_seed_extras)
 
 Only the main functions are described here there are many more for use in specific circumstances, 
 please refer to the `doc.rs` documentation for a full list.
+
+Here is a complete lib.rs demonstrating the basic usage.
+
+```
+#![feature(track_caller)]
+use seed::{prelude::*, *};
+use comp_state::*;
+use comp_state_seed_extras::*;
+
+#[derive(Default)]
+struct Model {}
+
+enum Msg {
+    NoOp,
+}
+
+impl Default for Msg {
+    fn default() -> Msg {
+        Msg::NoOp
+    }
+}
+
+fn update(msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {
+    match msg {
+        Msg::NoOp => (),
+    }
+}
+
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    div![
+        my_button(),
+        my_button(),
+        my_button(),
+    ]
+}
+
+#[topo::nested]
+fn my_button() -> Node<Msg> {
+    let count = use_state(|| 3);
+
+    div![
+        count.get().to_string(),
+        button!["+", count.mouse_ev(Ev::Click, |count, _| *count += 1)],
+    ]
+}
+```
 "#,
         )],
         section![
@@ -536,8 +676,8 @@ please refer to the `doc.rs` documentation for a full list.
                 "state_functions",
                 "State Functions",
                 "Seed hooks' **state functions** are functions that relate to the storing of local state for a component.
-The primary function used is `use_state` which stores an arbitary value and returns an accessor struct. The other functions are used
-in specific situations, of which `use_state_unique` is covered here."
+The primary function used is `use_state` which stores an arbitary value and returns an accessor. The other functions are used
+in specific situations, of which `new_state` is covered here."
             ),
             function_desc(
                 "use_state",
@@ -564,9 +704,9 @@ fn my_button() -> Node<Msg> {
 }"#,modal_content, use_state_example
             ),
             function_desc(
-                "use_state_unique",
-                "`use_state_unique`",
-                Some("fn use_state_unique<T: 'static, F: FnOnce() -> T>(data_fn: F) -> StateAccess<T>"),
+                "new_state",
+                "`new_state`",
+                Some("fn new_state<T: 'static, F: FnOnce() -> T>(data_fn: F) -> StateAccess<T>"),
                 r#"This function is identical to `use_state` with the exception that every time the function is executed it creates a new 
 topological context. The closure runs on every execution.
 
@@ -582,18 +722,18 @@ button![
 ]
 ```
 The problem with this is that every state accessor stored within the todo list will refer to the same component. 
-Simply using `use_state_unique` will ensure that every accessor stored will refer to a new topological context:
+Simply using `new_state` will ensure that every accessor stored will refer to a new topological context:
 
 ```
 button![
-    todos.mouse_ev(Ev::Click, move |t,_| t.push(use_state_unique(String::new))),
+    todos.mouse_ev(Ev::Click, move |t,_| t.push(new_state(String::new))),
     "Add" 
 ]
 ```
 The code example on the right is a fully interactive todo list in 15 line of code. `todos` is a state accessor that stores 
 a `Vec` of `String` state accessors, these are then used to store the state of each todo. 
 
-`use_state_unique` is used in the on click event do add a new unique todo.
+`new_state` is used in the on click event do add a new unique todo.
 "#,
 r#"#[topo::nested]
 fn todos() -> Node<Msg> {
@@ -611,27 +751,26 @@ fn todos() -> Node<Msg> {
             ]
         }),
         button![
-            todos.mouse_ev(Ev::Click, move |t,_| t.push(use_state_unique(String::new))),
+            todos.mouse_ev(Ev::Click, move |t,_| t.push(new_state(String::new))),
             "Add Todo" 
         ]
     ]
-}"#, modal_content ,use_state_unique_example
+}"#, modal_content ,new_state_example
             ),
         ],
         section![
-        
             section_desc(
                 "conditional",
-                "Conditional Functions",
+                "Conditional Execution Functions",
                 r#"**Seed Hooks** provide some functions to assist with conditionally executing code. 
-This is required when taking a hooks approach to component design because some logic may need to be exectured in the view. 
+This is required when taking a hooks approach to component design because some logic may need to be executed in the view. 
 The primary hooks in this regard are `do_once` and `after_render`.
     "#),
     function_desc(
         "do_once",
         "`do_once`",
         Some("fn do_once<F: Fn() -> ()>(func: F)"),
-        "`do_once()` executes the closure supplied once and only once. The execution runs syncrhonously that is immediately prior to any further statement. 
+        "`do_once()` executes the closure supplied once and only once. The execution runs synchronously that is immediately prior to any further statement. 
 Often this is combined with `after_render()` which schedules an closure to be executed after the next page render.  You typically use `do_once()` 
 when triggering an external javascript library that needs to complete an action a single time prior to a component being mounted.
         
@@ -664,7 +803,7 @@ fn welcome_user_once(name: String) -> Node<Msg> {
         "after_render",
         "`after_render`",
         Some("fn after_render<F: Fn(f64) -> () + 'static>(func: F)"),
-        "`after_render()` executes the closure supplied after the next render. The execution runs asyncrhonously 
+        "`after_render()` executes the closure supplied after the next render. The execution runs asynchronously 
 that is after the DOM tree has been created, diffed, and after the view has been painted to the window.
 Often this is combined with `do_once()` which schedules an closure to be executed only once after the next page render.  You typically use `after_render()` 
 when triggering a dom interaction, for instance an animation or popup that is not part of the virtual dom tree.
@@ -704,31 +843,177 @@ fn if_example() -> Node<Msg> {
 "#,modal_content, if_example
     ),
         ],
-        // section![
+        section![
         //     h2![a![attrs![At::Name=>"state_access"], "StateAccess Struct"]],
-        //     p!["Introduction here"],
-        //     function_desc(
-        //         "state_access_get",
-        //         "get",
-        //         "this is the get",
-        //         "this is the for the get"
-        //     ),
-        //     function_desc(
-        //         "state_access_set",
-        //         "set",
-        //         "this is the StateAccess set",
-        //         "this is the code for the StateAcess set"
-        //     ),
-        //     function_desc(
-        //         "state_access_update",
-        //         "use_state_current",
-        //         "this is the use state access update function",
-        //         "this is the code for the state access update"
-        //     )
-        // ],
-        // section![
-        //     h2![a![attrs![At::Name=>"dx"], "Developer Experience"]],
-        //     p!["Introduction here"]
-        // ], 
+        section_desc(
+            "state_access",
+            "StateAccess<T>",
+            r#"Seed Hook's **State Functions** return a `StateAccess<T>` value. This is an accessor which
+provides amoungst other features getter and setter access to the stored value of type T.
+
+The `StateAccess<T>` accessor knows what component's state to update and therefore this accessor can be used 
+in `EventHandler` callbacks to update state.
+
+Please note that unlike React Hooks StateAccess getter & setters do not reschedule a re-render of the 
+virtual DOM.
+
+The struct implements `Copy` and therefore can be freely shared, this is independent as to whether `T` imlements `Copy`.
+
+The primary method used to retrive stored data is `get()`, this only works with `Clone` types. For non-`Clone` types
+the `get_with()` method is available.
+
+Advanced patterns include using `bind()` to link an accessor to a DOM element's attribute or storing a 
+collection of state accessors to manage complex tree structures.
+"#),
+        ]
+        ,
+        function_desc(
+            "get",
+            "`get`",
+            Some("fn get(&self) -> T // T must be Clone + 'static"),
+            "This method returns a clone of the stored data, therefore in order for it to be used `T` must of course implement `Clone`.
+Although all accesses will therefore cause an allocation due to the clone, this is the most ergonomical way in which to access the stored data.
+Care should be taken in understanding that the clone may be stale if this value is used in a callback.
+
+For this reason using `update()` in a callback is usually prefereable to using `set()`.
+
+The example demonstrates displaying a value stored by an accessor from an `Input` event.",
+    r#"
+    #[topo::nested]
+    fn my_input() -> Node<Msg> {
+        let input_access = use_state(|| "".to_string());
+    
+        div![
+            input![attrs![At::Value => input_access.get()], 
+                input_access.input_ev(Ev::Input, |i,text| *i=text)
+            ],
+            format!("Text inputted: {}", input_access.get())
+        ]
+    }
+    "#,modal_content, my_input
+        ) ,
+        function_desc(
+            "get_with",
+            "`get_with`",
+            Some("fn get_with<F: FnOnce(&T) -> R, R>(self, func: F) -> R"),
+            "This method provides read access to a stored store variable via a closure.
+This method is primarily used to read non-`Clone` values or where cloning is seen as expensive.
+
+The typical pattern is to return a representation of the data stored from the `get_with()` closure. 
+For instance, if a non-`Clone` struct that contains date information is stored then the closure might return
+a `String` representation of this date information.
+
+It is essential to understand that in order to provide unfettered read access to the stored value 
+`get_with()` temporarily removes the value from the backing-store and re-inserts it at the end of the block. 
+The effect of this is that any use of the `StateAccess`or within the `get_with()` closure is almost always an error.
+
+The example demonstrates displaying a non Clone value stored by an accessor from an `Input` event.",
+r#"
+struct NonCloneString(String);
+
+#[topo::nested]
+fn my_non_clone_input() -> Node<Msg> {
+    let input_access = use_state(|| NonCloneString("".to_string()));
+    let val = input_access.get_with(|v| format!("{}", v.0));
+
+    div![
+        input![attrs![At::Value => val], 
+            input_access.input_ev(Ev::Input, |i,text| *i=NonCloneString(text))
+        ],
+        format!("Text inputted: {}", val)
+    ]
+}
+    "#,modal_content, my_non_clone_input
+        ),
+        function_desc(
+            "set",
+            "`set`",
+            Some("fn set(self, value: T)"),
+            "This method simply updates the stored value. `set()` is generally called in an `EventHandler` callback.
+If the updated value depends on the current value it is generally better to use `update()` rather than `set()`
+
+The example on the right set the value based on a clicked item in a list.",
+r#"
+#[topo::nested]
+fn set_list() -> Node<Msg> {
+    let selected = use_state(||"");
+
+    ul![ "Selected Item:", selected.get(),
+        li!["1st Item", mouse_ev(Ev::Click, move |_| { selected.set("1"); Msg::default() }), class![C.cursor_pointer]],
+        li!["2nd Item", mouse_ev(Ev::Click, move |_| { selected.set("2"); Msg::default() }), class![C.cursor_pointer]],
+        li!["3rd Item", mouse_ev(Ev::Click, move |_| { selected.set("3"); Msg::default() }), class![C.cursor_pointer]],
+        li!["4th Item", mouse_ev(Ev::Click, move |_| { selected.set("4"); Msg::default() }), class![C.cursor_pointer]],
+        li!["5th Item", mouse_ev(Ev::Click, move |_| { selected.set("5"); Msg::default() }), class![C.cursor_pointer]],
+    ]
+}
+"#,modal_content, set_list
+        ),
+        function_desc(
+            "update",
+            "`update`",
+            Some("fn update<F: FnOnce(&mut T) -> ()>(self, func: F)"),
+            "This method simply updates the stored value by providing mutable access within a closure.
+This is the prefered method if updating a value in place, particularly if the change depends on the existing value.
+
+It is essential to understand that in order to provide unfettered read access to the stored value 
+`update()` temporarily removes the value from the backing-store and re-inserts it at the end of the block. 
+The effect of this is that any use of the `StateAccess`or within the `update()` closure is almost always an error.
+
+The example on the right demonstrates a increasing / decreasing counter.",
+r#"#[topo::nested]
+fn update_example() -> Node<Msg> {
+    let count = use_state(|| 3);
+
+    div![
+        button![
+            "-",
+            mouse_ev(Ev::Click, move |_| {
+                count.update(|v| *v -= 1);
+                Msg::NoOp
+            }),
+        ],
+        count.get().to_string(),
+        button![
+            "+",
+            mouse_ev(Ev::Click, move |_| {
+                count.update(|v| *v += 1);
+                Msg::NoOp
+            }),
+        ],
+    ]
+}
+"#,modal_content, update_example
+        ),
+        section![
+            section_desc(
+                "dx",
+                "Developer Experience",
+                "Seed hooks provide a number of functions to simplify working with hooks."
+            ),
+            function_desc(
+                "bind",
+                "`bind`",
+                Some("fn bind<Ms: Default, T: 'static + std::str::FromStr + std::fmt::Display>( attr: At,
+val: StateAccess<T>,) -> (seed::virtual_dom::attrs::Attrs, seed::EventHandler<Ms>)"),
+                "it is a common requirement that the value of element attributes such as an input's 
+value attribute is linked to some value. `bind()` provides a shortcut to link an attribute to a value.
+You simplfy specify the attribute and state accessor to bind.  Currently limited to updating on `Input` events, 
+therefore currently only usable with `input![]` elements.
+
+The example on the right binds integers to an input and then calculates a value with them.
+",
+r#"#[topo::nested]
+fn numberbind() -> Node<Msg> {
+    let a = use_state(|| 0);
+    let b = use_state(|| 0);
+
+    div![
+        input![attrs![At::Type=>"number"], bind(At::Value, a)],
+        input![attrs![At::Type=>"number"], bind(At::Value, b)],
+        p![format!("{} + {} = {}", a.get(), b.get(), a.get() + b.get())]
+    ]
+}
+"#,modal_content, numberbind)
+    ]  
     ]
 }

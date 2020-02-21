@@ -187,12 +187,8 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // - "▶\u{fe0e}" - \u{fe0e} is the variation selector, it prevents ▶ to change to emoji in some browsers
 //   - https://codepoints.net/U+FE0E
 
-pub fn view(model: &Model) -> impl View<Msg> {
-    root_view(model)
-}
-
 #[topo::nested]
-pub fn root_view(model: &Model) -> Node<Msg> {
+pub fn view(model: &Model) -> impl View<Msg> {
     div![
         class![C.fade_in, C.min_h_screen, C.flex, C.flex_col,],
         match model.page {
