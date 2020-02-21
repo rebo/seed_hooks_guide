@@ -142,6 +142,13 @@ pub enum Msg {
     UpdatePageTitle,
     ScrollToTop,
     Scrolled(i32),
+    NoOp,
+}
+
+impl std::default::Default for Msg {
+    fn default() -> Self {
+        Msg::NoOp
+    }
 }
 
 pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -165,6 +172,7 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Scrolled(position) => {
             *model.scroll_history.push_back() = position;
         },
+        Msg::NoOp => {},
     }
 }
 
