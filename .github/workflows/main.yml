@@ -18,14 +18,16 @@ jobs:
         with:
           profile: minimal
           toolchain: nightly
+          default: true
           components: rustfmt
 
       - name: Install Nightly Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
+          default: true
           toolchain: nightly
-          
+
       - name: Install cargo-make
         uses: davidB/rust-cargo-make@v1
 
