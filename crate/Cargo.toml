@@ -19,8 +19,9 @@ wasm-bindgen-test = "^0.3.8"
 wasm-bindgen = "^0.2.58"
 seed = "0.6.0"
 fixed-vec-deque = "0.1.8"
-comp_state = "0.2.1"
-comp_state_seed_extras = "0.0.8"
+comp_state = "0.2.2"
+# comp_state = {path = "../../comp_state"}
+comp_state_seed_extras = "0.0.9"
 # comp_state_seed_extras = {path = "../../comp_state_seed_extras"}
 # once_cell = "1.3.1"
 comrak = "0.7.0"

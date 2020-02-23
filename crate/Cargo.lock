@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "comp_state"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "anymap 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -112,10 +112,10 @@ dependencies = [
 
 [[package]]
 name = "comp_state_seed_extras"
-version = "0.0.8"
+version = "0.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "comp_state 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "comp_state 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "seed 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -547,8 +547,8 @@ dependencies = [
 name = "rebo"
 version = "0.1.0"
 dependencies = [
- "comp_state 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "comp_state_seed_extras 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "comp_state 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "comp_state_seed_extras 0.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "comrak 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "fixed-vec-deque 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "seed 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1009,8 +1009,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum byteorder 1.3.4 (registry+https://github.com/rust-lang/crates.io-index)" = "08c48aae112d48ed9f069b33538ea9e3e90aa263cfa3d1c24309612b1f7472de"
 "checksum cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)" = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 "checksum clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5067f5bb2d80ef5d68b4c87db81601f0b75bca627bc2ef76b141d7b846a3c6d9"
-"checksum comp_state 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "c84abb1ab36c229dc2eaec206e662998aa4bf56f5d86be3a71319a077ea9ceec"
-"checksum comp_state_seed_extras 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "90597688efe16a092d5818b1265dd4889bf8c76b7b7133762039abc7d23fc02a"
+"checksum comp_state 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "db1f9c1f66dcd56cf25bc707a8d11ed858d6790aa33f7ac3365b2abbfd831377"
+"checksum comp_state_seed_extras 0.0.9 (registry+https://github.com/rust-lang/crates.io-index)" = "9d4460e23a4257ba935ab7fb83a28400df69a4ff517efe646356e27660ad10ad"
 "checksum comrak 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e17058cc536cf290563e88787d7b9e6030ce4742943017cc2ffb71f88034021c"
 "checksum console_error_panic_hook 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "b8d976903543e0c48546a91908f21588a680a8c8f984df9a5d69feccb2b2a211"
 "checksum cookie 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)" = "888604f00b3db336d2af898ec3c1d5d0ddf5e6d462220f2ededc33a87ac4bbd5"

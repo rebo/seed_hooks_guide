@@ -3,25 +3,34 @@ use comp_state::{topo, do_once,use_state, use_state_unique, CloneState, StateAcc
 use comp_state_seed_extras::{after_render_once,StateAccessEventHandlers, UpdateElLocal,bind, after_render, get_html_element_by_id, };
 use comrak::{markdown_to_html, ComrakOptions};
 use wasm_bindgen::JsCast;
+use crate::Page;
 
 use seed::{prelude::*, *};
 pub fn view() -> Node<Msg> {
     div![
-        class![C.flex C.flex_row],
+        class![C.flex C.flex_col],
+        div![class![C.shadow_xl, C.bg_gray_600, C.text_gray_200, C.flex, C.justify_end, C.content_center, C.items_center],
+            a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100,  C.hover__border_white], attrs!(At::Href => Page::Home.to_href()), "SEED HOOKS"],
+            a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100, C.hover__border_white], attrs!(At::Href => Page::Tutorial.to_href()), "TUTORIAL"],
+            a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100,  C.hover__border_white], attrs!(At::Href => Page::ApiRef.to_href()), "API REFERENCE"],
+        ], 
         div![
-            class![ 
-                C.w_1of4,
-                C.h_screen,
-                C.bg_gray_700,
-                C.text_gray_400,
-                C.overflow_y_auto
+            class![C.flex C.flex_row], 
+            div![
+                class![ 
+                    C.w_1of4,
+                    C.h_screen,
+                    C.bg_gray_700,
+                    C.text_gray_400,
+                    C.overflow_y_auto
+                ],
+                left_bar_content(),
             ],
-            left_bar_content(),
-        ],
-        div![
-            class![C.w_3of4, C.h_screen, C.overflow_y_auto],
-            main_screen_content()
-        ],
+            div![
+                class![C.w_3of4, C.h_screen, C.overflow_y_auto],
+                main_screen_content()
+            ],
+        ]
     ]
 }
 
@@ -42,12 +51,12 @@ fn left_bar_content() -> Node<Msg> {
                 "State Functions"
             ],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#use_state"],
                 "use_state"
             ]],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#new_state"],
                 "new_state"
             ]],
@@ -59,12 +68,12 @@ fn left_bar_content() -> Node<Msg> {
                 "Conditional Execution"
             ],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#do_once"],
                 "do_once"
             ]],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#after_render"],
                 "after_render"
             ]],
@@ -76,22 +85,22 @@ fn left_bar_content() -> Node<Msg> {
                 "StateAccess<T>"
             ],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#get"],
                 "get"
             ]],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#get_with"],
                 "get_with"
             ]],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#set"],
                 "set"
             ]],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#update"],
                 "update"
             ]],
@@ -109,7 +118,7 @@ fn left_bar_content() -> Node<Msg> {
         ul![
             a![attrs![At::Href=>"api_ref#dx"], "DX"],
             li![a![
-                class![C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
                 attrs![At::Href=>"api_ref#bind"],
                 "bind"
             ]],
@@ -152,7 +161,12 @@ fn section_desc<T: Into<String>>(
 
     let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
 
-    after_render_once(move |_| {
+    let drop_type = use_state(crate::DropType::default);
+    do_once(|| drop_type.update(|dt| dt.dropped = true));
+
+    if drop_type.get().dropped {
+        after_render(move |_| {
+
         if let Some(desc_el) = desc_el.get().get() {
             let code_children = desc_el.get_elements_by_tag_name("h3");
 
@@ -172,6 +186,7 @@ fn section_desc<T: Into<String>>(
             }
         }
     });
+}
 
     nodes![
         h2![
@@ -181,7 +196,7 @@ fn section_desc<T: Into<String>>(
         hr![class![C.my_8 C.border_b_2 C.border_gray_200]],
         div![
             el_ref(&desc_el.get()),
-            class![C.m_3 C.leading_relaxed],
+            class!["api-description" C.m_3 C.leading_relaxed],
             raw!(&description)
         ],
     ]
@@ -205,7 +220,14 @@ fn function_desc<T: Into<String>>(
     let code_el = use_state(ElRef::<web_sys::HtmlElement>::default);
     let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
 
-    after_render_once(move |_| {
+    let drop_type = use_state(crate::DropType::default);
+    do_once(|| drop_type.update(|dt| dt.dropped = true));
+
+    if drop_type.get().dropped {
+        after_render(move |_| {
+
+
+    
         if let Some(code_el) = code_el.get().get() {
             if let Some(desc_el) = desc_el.get().get() {
                 let code_children = desc_el.get_elements_by_tag_name("code");
@@ -222,6 +244,7 @@ fn function_desc<T: Into<String>>(
             highlightElement(code_el);
         }
     });
+   }
 
     div![
         h3![

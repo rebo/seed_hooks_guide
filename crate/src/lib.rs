@@ -9,11 +9,11 @@
 mod generated;
 mod page;
 
-use comp_state::topo;
+use comp_state::{clone_state_with_topo_id, topo, StateAccess};
 use fixed_vec_deque::FixedVecDeque;
 use generated::css_classes::C;
 use seed::{prelude::*, *};
-
+use wasm_bindgen::JsCast;
 const TITLE_SUFFIX: &str = "seedhooks";
 // https://mailtolink.me/
 // const MAIL_TO_REBO: &str = "mailto:rebotfc@gmail.com";
@@ -55,6 +55,8 @@ pub enum Page {
     Home,
     ApiRef,
     About,
+    Tutorial,
+    TutorialExample,
     NotFound,
 }
 
@@ -64,6 +66,8 @@ impl Page {
             Self::Home => "/",
             Self::ApiRef => "/api_ref",
             Self::About => "/about",
+            Self::Tutorial => "/tutorial",
+            Self::TutorialExample => "/tutorial_example",
             Self::NotFound => "/404",
         }
     }
@@ -75,6 +79,8 @@ impl From<Url> for Page {
             None | Some("") => Self::Home,
             Some("about") => Self::About,
             Some("api_ref") => Self::ApiRef,
+            Some("tutorial") => Self::Tutorial,
+            Some("tutorial_example") => Self::TutorialExample,
             _ => Self::NotFound,
         }
     }
@@ -142,6 +148,7 @@ pub enum Msg {
     UpdatePageTitle,
     ScrollToTop,
     Scrolled(i32),
+    SubmitMarkdownHtml(String),
     NoOp,
 }
 
@@ -156,29 +163,38 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::RouteChanged(url) => {
             model.page = url.into();
             orders.send_msg(Msg::UpdatePageTitle);
-        },
+        }
         Msg::UpdatePageTitle => {
             let title = match model.page {
                 Page::Home => TITLE_SUFFIX.to_owned(),
                 Page::ApiRef => format!("Api Reference - {}", TITLE_SUFFIX),
                 Page::About => format!("About - {}", TITLE_SUFFIX),
+                Page::Tutorial => format!("Tutorial - {}", TITLE_SUFFIX),
+                Page::TutorialExample => format!("MarkdownEditor - {}", TITLE_SUFFIX),
                 Page::NotFound => format!("404 - {}", TITLE_SUFFIX),
             };
             document().set_title(&title);
-        },
-        Msg::ScrollToTop => window().scroll_to_with_scroll_to_options(
-            web_sys::ScrollToOptions::new().top(0.),
-        ),
+        }
+        Msg::ScrollToTop => {
+            window().scroll_to_with_scroll_to_options(web_sys::ScrollToOptions::new().top(0.))
+        }
         Msg::Scrolled(position) => {
             *model.scroll_history.push_back() = position;
-        },
-        Msg::NoOp => {},
+        }
+        Msg::SubmitMarkdownHtml(html) => log!(html),
+        Msg::NoOp => {}
     }
 }
 
 // ------ ------
 //     View
 // ------ ------
+#[derive(Clone, Default)]
+pub struct DropType {
+    dropped: bool,
+}
+
+impl DropType {}
 
 // Notes:
 // - \u{00A0} is the non-breaking space
@@ -189,17 +205,28 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 #[topo::nested]
 pub fn view(model: &Model) -> impl View<Msg> {
-    div![
+    let view = div![
         class![C.fade_in, C.min_h_screen, C.flex, C.flex_col,],
         match model.page {
             Page::Home => page::home::view().els(),
             Page::ApiRef => page::api_ref::view().els(),
             Page::About => page::about::view().els(),
+            Page::Tutorial => page::tutorial::view().els(),
+            Page::TutorialExample => page::tutorial_example::view().els(),
             Page::NotFound => page::not_found::view().els(),
         },
         page::partial::header::view(model).els(),
         page::partial::footer::view().els(),
-    ]
+    ];
+    let unseen_ids = comp_state::unseen_ids();
+    for id in unseen_ids.iter() {
+        if let Some(drop_type) = clone_state_with_topo_id::<DropType>(*id) {
+            let access = StateAccess::<DropType>::new(*id);
+            access.update(|dt| dt.dropped = true);
+        }
+    }
+    comp_state::reset_unseen_id_list();
+    view
 }
 
 pub fn image_src(image: &str) -> String {
