@@ -881,7 +881,7 @@ fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) ->
                 })
             ],
             div![
-                class!["md-preview"],
+                class!["md-preview markdown-body"],
                 el_ref(&preview_el.get()),
                 class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
                 md![source.get()]
