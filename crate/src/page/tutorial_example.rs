@@ -7,7 +7,7 @@ use seed::{prelude::*, *};
 pub fn view() -> Node<Msg> {
     div![
         div![div![class![
-            "absolute w-full h-full bg-gray-900 opacity-50"
+            C.absolute C.w_full C.h_full C.bg_gray_900 C.opacity_50
         ]]],
         class![C.fixed, C.inset_0, C.z_50, C.overflow_auto, C.flex,],
         div![
@@ -55,20 +55,20 @@ fn markdown_editor() -> Node<Msg> {
     let source = use_state(|| {
         "# Header
 
-    ## Smaller Header
-    
-    **Hello** this is a *markdown* renderer.
-    
-    * List item
-    * List item
-        1. Number item
-        1. Number item
-        1. Number item
-    * List item
-    * List item
-    * List item
-    * List item    
-    "
+## Smaller Header
+
+**Hello** this is a *markdown* renderer.
+
+* List item
+* List item
+    1. Number item
+    1. Number item
+    1. Number item
+* List item
+* List item
+* List item
+* List item    
+"
         .to_string()
     });
     let preview_el = use_state::<ElRef<web_sys::HtmlElement>, _>(ElRef::default);
@@ -77,18 +77,18 @@ fn markdown_editor() -> Node<Msg> {
     let processed_md = markdown_to_html(&source.get(), &ComrakOptions::default());
 
     div![
-        class!["flex flex-col"],
+        class![C.flex C.flex_col],
         div![
-            class!["flex flex-row"],
-            div![class!("w-1/2"), "Markdown:"],
-            div![class!("w-1/2"), "Preview:"],
+            class![C.flex C.flex_row],
+            div![class!(C.w_1of2), "Markdown:"],
+            div![class!(C.w_1of2), "Preview:"],
         ],
         div![
-            class!["flex" "flex-row" "h-64"],
+            class!["flex" "flex-row" C.h_64],
             textarea![
                 el_ref(&textarea_el.get()),
                 bind(At::Value, source),
-                class!["font-mono p-2 h-full flex-none w-1/2 border-gray-200 border shadow-lg"],
+                class![C.font_mono C.p_2 C.h_full C.flex_none C.w_1of2 C.border_gray_200 C.border C.shadow_lg],
                 attrs![At::Type => "textbox"],
                 textarea_el.input_ev(Ev::KeyUp, move |el, _| {
                     if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
@@ -104,14 +104,14 @@ fn markdown_editor() -> Node<Msg> {
             div![
                 class!["md-preview"],
                 el_ref(&preview_el.get()),
-                class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
+                class![C.overflow_auto C.p_2 C.pl_4 C.h_full C.flex_none C.w_1of2 C.border_gray_200 C.bg_indigo_100 C.border C.shadow_lg],
                 raw!(&processed_md)
             ]
         ],
         div![
-            class!["flex justify-end pt-2"],
+            class![C.flex C.justify_end C.pt_2],
             button![
-                class!["bg-green-400 rounded-lg p-4 m-2"],
+                class![C.bg_green_400 C.rounded_lg C.p_4 C.m_2],
                 "Submit",
                 mouse_ev(Ev::Click, move |_| Msg::SubmitMarkdownHtml(processed_md))
             ]
