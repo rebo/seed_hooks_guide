@@ -10,7 +10,7 @@ pub fn view() -> Node<Msg> {
     div![
         class![C.flex C.flex_col],
         div![class![C.shadow_xl, C.bg_gray_600, C.text_gray_200, C.flex, C.justify_end, C.content_center, C.items_center],
-            a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100,  C.hover__border_white], attrs!(At::Href => Page::Home.to_href()), "SEED HOOKS"],
+            a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100,  C.hover__border_white], attrs!(At::Href => "#"), "SEED HOOKS"],
             a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100, C.hover__border_white], attrs!(At::Href => Page::Tutorial.to_href()), "TUTORIAL"],
             a![class![C.h_full, C.border_r_2, C.py_2, C.px_2, C.mx_4,C.hover__text_white, C.border_gray_100,  C.hover__border_white], attrs!(At::Href => Page::ApiRef.to_href()), "API REFERENCE"],
         ], 

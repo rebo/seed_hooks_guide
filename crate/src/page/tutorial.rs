@@ -12,9 +12,10 @@ use wasm_bindgen::JsCast;
 use seed::{prelude::*, *};
 pub fn view() -> Node<Msg> {
     div![
-        class![C.flex C.flex_col],
+        class!["container" C.h_screen],
         div![
             class![
+                "header",
                 C.shadow_xl,
                 C.bg_gray_600,
                 C.text_gray_200,
@@ -34,7 +35,7 @@ pub fn view() -> Node<Msg> {
                     C.border_gray_100,
                     C.hover__border_white
                 ],
-                attrs!(At::Href => Page::Home.to_href()),
+                attrs!(At::Href => "#"),
                 "SEED HOOKS"
             ],
             a![
@@ -67,22 +68,16 @@ pub fn view() -> Node<Msg> {
             ],
         ],
         div![
-            class![C.flex C.flex_row],
-            div![
-                class![
-                    C.w_1of4,
-                    C.h_screen,
-                    C.bg_gray_700,
-                    C.text_gray_400,
-                    C.overflow_y_auto
-                ],
-                left_bar_content(),
+            class![
+                "left",
+                // C.w_1of4,
+                C.bg_gray_700,
+                C.text_gray_400,
+                C.overflow_y_auto
             ],
-            div![
-                class![C.w_3of4, C.h_screen, C.overflow_y_auto],
-                main_screen_content()
-            ],
-        ]
+            left_bar_content(),
+        ],
+        div![class!["main", C.overflow_y_auto], main_screen_content()],
     ]
 }
 
@@ -240,8 +235,8 @@ important to install a recent nightly. **Furthermore as of 19th February there i
 Therefore to be safe use the verison.
 
 ```
-rustup install nightly-2020-02-07
-rustup default nightly-2020-02-07
+rustup install nightly-2020-02-17
+rustup default nightly-2020-02-17
 ```
 
 ## Download Quickstart
