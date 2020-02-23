@@ -35,7 +35,6 @@ pub fn view() -> Node<Msg> {
                     C.border_gray_100,
                     C.hover__border_white
                 ],
-                attrs!(At::Href => "#"),
                 "SEED HOOKS"
             ],
             a![
@@ -129,7 +128,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step3"],
-                "Step 3 -  Prettifying Output",
+                "Step 3 -  Prettifying the Output",
             ]],
             li![a![
                 class![
@@ -139,7 +138,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.border_transparent,
                     C.hover__border_gray_300
                 ],
-                attrs![At::Href=>"tutorial#step44"],
+                attrs![At::Href=>"tutorial#step4"],
                 "Step 4 - Message Submission",
             ]],
         ],
@@ -219,6 +218,8 @@ In this tutorial we will create a live markdown renderer component that can free
 
 You can see the finished component example by clicking [here](/tutorial_example).
 
+To assist checking progress in this tutorial please see here for the [final code](https://github.com/rebo/markdown-editor).
+
 What we are going to do in this section is 
 
 1. Install nightly rust
@@ -254,6 +255,8 @@ Check it compiles and serves correctly with
 cargo make build; cargo make serve
 ```
 
+You can access the site from `http://localhost:8000`. This will display a simple button counter.
+
 ## CSS 
 
 We will be using [TailwindCSS](https://tailwindcss.com) for our CSS. Therefore we need to set this up.  Create a `package.json` in the project root with
@@ -275,7 +278,7 @@ Next install TailwindCss with
 yarn add tailwindcss
 ```
 
-Next create a `styles.css` again in the project root with these contents: 
+Next create a `styles.css` in the project root with these contents: 
 
 ```
 // In styles.css...
@@ -290,7 +293,7 @@ Next create a `styles.css` again in the project root with these contents:
 Now build the tailwindCSS with 
 
 ```
-yarn tailwindcss build styles.css -o output.css
+npx tailwindcss build styles.css -o output.css
 ```
 
 and add this to the `index.html`
@@ -307,7 +310,7 @@ and add this to the `index.html`
 
 ### Seed Hooks Setup
 
-In order to enable **Seed Hooks** add the following to `Cargo.toml`
+In order to enable **Seed Hooks** add the following to `Cargo.toml` in the `[dependencies]` section. 
 
 ```
 // In Cargo.toml...
@@ -318,7 +321,7 @@ comp_state_seed_extras = "0.0.8"
 
 Next, Seed hooks rely on the nightly `TrackCaller` feature you need to add the `#![feature(track_caller)]` feature flag to the top of `lib.rs`.
 
-Remove all existing `Model` and `Msg` fields/variants. 
+Remove all existing `Model` and `Msg` fields/variants. You will also want to remove the match processing of `Msg` in your update function.
 
 You should also glob import both `comp_state` and `comp_state_seed_extras` with 
 
@@ -330,12 +333,17 @@ use comp_state_seed_extras::*;
 ```
 
 The final bit of setup required is to add a root component to the seed view. This is acheived by annotating 
-the main seed view function with `#[topo::nested]`. 
+the main seed view function with `#[topo::nested]`.   For now replace the contents of the root view with a simple `div!`.
 
+```
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    div![]
+}
+```
 
 This annotation means that the view function becomes part of the component hierarchy. Indeed this acts as the root compnent 
 under which all other components are structured.
-
 
 The final base `lib.rs` should be as per below :
 
@@ -392,7 +400,12 @@ fn markdown_editor() -> Node<Msg> {
     div![
         class!["flex flex-col"],
         div![
-            class!["flex" "flex-row" "h-64"],
+            class!["flex flex-row"],
+            div![class!["w-1/2"], "Markdown:"],
+            div![class!["w-1/2"], "Preview:"],
+        ],
+        div![
+            class!["flex flex-row h-64"],
             textarea![
                 class!["bg-red-300 h-full flex-none w-1/2"],
                 attrs![At::Type => "textbox"],
@@ -406,10 +419,39 @@ fn markdown_editor() -> Node<Msg> {
             button![class!["bg-green-400 p-4 m-2"], "Submit"]
         ]
     ]
-}        
+} 
 ```
 
-The reason we annotate with `#[topo::nested]` is so that markdown_editor can operaate as its own component with local state. 
+This component can be rendered by calling it in the root view... 
+
+```
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    markdown_editor(Msg::SubmitMarkdownHtml)
+}
+```
+
+The reason we annotate with `#[topo::nested]` is so that markdown_editor can operate as its own component with local state. 
+
+### Cargo Watch
+
+At this stage it would be worth setting up a cargo watch loop to rebuild the wasm file and re-serve so that you can see your changes
+more immediately in the browser.
+
+Run the following in separate terminal windows
+
+```
+cargo make serve
+```
+and 
+```
+cargo make watch
+```
+
+`cargo make serve` will ensure that your server is always running and `cargo make watch` will automatically re-compile the .wasm file. 
+Therefore the only thing that you will need to do is refresh the browser after updating any of your rust files.
+
+
 
 ### Data Flow
 
@@ -460,6 +502,16 @@ impl std::default::Default for Msg {
     }
 }
 ```
+If you still have a `match msg` in your `update()` function you will need to add this variant to the match. i.e.
+
+```
+
+fn update(msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {
+    match msg {
+        Msg::NoOp => {}
+    }
+}
+```
 
 Lastly lets ensure that the bind is working correctly and we will output the raw textarea input into the preview div:
 
@@ -474,7 +526,7 @@ fn markdown_editor() -> Node<Msg> {
     ]
     ...
 ```
-Now typing in the text area should be replicated in the preview div.
+Refreshing your browser now (`https://localhost:8000) and typing in the text area should out put the text directly within the preview `div`.
 
 "#
         ),
@@ -485,9 +537,7 @@ Now typing in the text area should be replicated in the preview div.
 
 What we are going to do in this section is 
 
-1. Decide how to process the textarea field.
-1. Add event handlers to process the data on an Input event.
-
+1. Process the source state variable as markdown prior to rendering in the view.
 
 ### How to process
 
@@ -495,58 +545,18 @@ We now have a basic bind set up, updating the text area will update the `source`
 This is then directly output to the preview div.
 
 Instead of outputting directly to the preview div, we want it to be processed as markdown. 
-In order to do this we will use an existing markdown crate `comrak` and use this to process 
-the source. 
+Fortunately Seed has an in-built macro that renders markdown from a `&str`.
 
-Add `comrak` to your `Cargo.toml` :
-
-```
-// In in Cargo.toml...
-
-comrak = "0.7.0"
-```
-
-### When to process
-Because the view will refresh on `bind` update we simply have to process the markdown 
-in the view prior to displaying in the markdown div. Add the following to the top of `lib.rs`
-
-```
-// In in lib.rs...
-
-use comrak::{markdown_to_html, ComrakOptions};
-```
-
-Then after the `let source = ...` line add the following processing statement:
-
-```
-// In in lib.rs...
-
-let processed_md = markdown_to_html(&source.get(), &ComrakOptions::default());
-```
-
-Finally change the `souce.get()` to `processed_md` within the preview div:  
+Simply wrap `source.get()` in `md![&source.get()` in the preview div:
 
 ```
 // In in lib.rs...
 
 div![
     class!["md-preview bg-yellow-300 flex-none w-1/2"],
-    processed_md
+    md![&source.get()]
 ]
 ```
-but there is a problem, the text is not rendering as html but rather a raw text string. 
-To fix this we make use of the seed `raw!()` macro which allows html strings to be rendered directly:
-
-```
-// In in lib.rs...
-
-div![
-    class!["md-preview bg-yellow-300 flex-none w-1/2"],
-    raw!(&processed_md)
-]
-```
-
-And thats it the preview div now updates automatically with processed markdown.
 
 Here is the final `markdown_editor` function at this stage. 
 
@@ -556,12 +566,10 @@ Here is the final `markdown_editor` function at this stage.
 fn markdown_editor() -> Node<Msg> {
     let source = use_state(|| String::new());
 
-    let processed_md = markdown_to_html(&source.get(), &ComrakOptions::default());
-
     div![
         class!["flex flex-col"],
         div![
-            class!["flex" "flex-row" "h-40"],
+            class!["flex flex-row h-40"],
             textarea![
                 bind(At::Value, source),
                 class!["bg-red-300 h-full flex-none w-1/2"],
@@ -569,7 +577,7 @@ fn markdown_editor() -> Node<Msg> {
             ],
             div![
                 class!["md-preview bg-yellow-300 h-full flex-none w-1/2"],
-                raw!(&processed_md)
+                md![&source.get()]
             ]
         ],
         div![
@@ -583,7 +591,7 @@ fn markdown_editor() -> Node<Msg> {
         ),
         section_desc(
             "step3",
-            "Step 3 -  Prettifying Output",
+            "Step 3 - Prettifying the output",
             r#"
 
 What we are going to do in this section is 
@@ -597,64 +605,29 @@ What we are going to do in this section is
 The UI currently is functional but it can be improved, specifically regarding the preview render.
 
 We therefore need to style both to better improve the UI.  TailwindCSS by default does a normalise
-pass on all styles. Therefore The first thing we will do is to add some base styles for the preview div.
+pass on all styles. 
 
-To do this add the following to `styles.css` after the `@tailwind base` statement. 
-
-```
-// In in styles.css...
-
-@tailwind base;
-
-div.md-preview {
-    @apply overflow-auto
-}
-
-div.md-preview h1 {
-    @apply text-2xl;
-    @apply underline;
-    @apply mb-2;
-  }
-  div.md-preview h2 {
-    @apply text-xl;
-    @apply mb-2;
-  }
-  div.md-preview h3 {
-    @apply text-lg;
-    @apply mb-2;
-  }
-
-  div.md-preview p {
-    @apply mb-2;
-  }
-
-  div.md-preview a {
-    @apply text-blue-600;
-    @apply underline;
-  }
-  div.md-preview li {
-    @apply pl-2;
-    @apply ml-6;
-  }
-
-  div.md-preview ul {
-    list-style-type: circle;
-  }
-
-  div.md-preview ol {
-    list-style-type: lower-alpha;
-  }
-
-@tailwind components;
-
-@tailwind utilities;
-```
-
-Remember to re-build the CSS via tailwind:  
+We will use `github-markdown-css` for this, download the [markdown css file](https://raw.githubusercontent.com/sindresorhus/github-markdown-css/gh-pages/github-markdown.css)
+and place it in the project root. Next link to this stylesheet in `index.html`.
 
 ```
-yarn tailwindcss build styles.css -o output.css
+// in index.html
+... 
+<head>
+    ...
+    <link rel="stylesheet" type="text/css" href="output.css">
+    <link rel="stylesheet" href="github-markdown.css"> 
+    .... 
 ```
+
+all the class `markdown-body` to the preview div.
+
+```
+/// in lib.rs
+div![
+    class!["md-preview markdown-body"],
+```
+This will ensure the preview pane's markdown is rendered correctly.
 
 Furthermore we woud like the `textarea` input to be mono-space. Therefore adjust it's class:
 
@@ -668,14 +641,23 @@ textarea![
 ],
 ```            
 
-Finally lets improve the look of the preview pane:  
+Finally lets improve the look of the preview pane. Here I have used two `class!` macros to separate the 
+TailwindCss classes from specificly chosen classes.
 
 ```
 div![
-    class!["md-preview"],
-    ...
+    class!["md-preview markdown-body"],
     class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
     ...
+```
+
+Lets try how it all works now, save the file refresh the browser. Try typing the following into the text area: 
+
+```
+# Seed Rocks
+
+**Yes** indeed it does *rock*.
+
 ```
 
 ### Auto scrolling the preview
@@ -684,16 +666,33 @@ When we edit the text area we ideally would like the preview to scroll to a simi
 This would enable our edits to be easier to see. Therefore we want to programatically scroll the md-preview div 
 on `KeyUp` and also on `Scroll` events.
 
-In order to do this we We need to identify the md-preview and also the textarea with ElRefs. 
-These are seeds way of identifying individual elements. 
+In order to do this we need to identify the md-preview and also the textarea with ElRefs. 
+These are Seed's way of identifying individual elements. 
+
+Due to the fact that we are going to refer to specific html elements via `web_sys` we need to add that as a dependency.
+
+In `Cargo.toml` add the following to the dependencies section: 
+
+```
+[dependencies]
+...
+web-sys = "^0.3.32"
+...
+```
+
+and enable access to the following types at the top of `lib.rs`:
+
+```
+use web_sys::{HtmlElement, HtmlTextAreaElement};
+```
 
 after the `let source = use_state..` line add two more use_state hooks. 
 
 ```
 // In in lib.rs...
 
-let preview_el = use_state::<ElRef<web_sys::HtmlElement>, _>(ElRef::default);
-let textarea_el = use_state::<ElRef<web_sys::HtmlTextAreaElement>, _>(ElRef::default);
+let preview_el = use_state::<ElRef<HtmlElement>, _>(ElRef::default);
+let textarea_el = use_state::<ElRef<HtmlTextAreaElement>, _>(ElRef::default);
 ```
 
 This provides access to two el_refs which we can later associate with specific elements. 
@@ -736,7 +735,7 @@ textarea_el.input_ev(Ev::KeyUp, move |el, _| {
 }),
 ```
 
-We also add an identical EventHandler callback for an `Ev:Scroll` event.
+We also add an identical EventHandler callback for an `Ev::Scroll` event.
 
 Once all the above is completed. scrolling and cursor navigating through the textarea will 
 result in a corrsponding scroll of the preview div.
@@ -840,7 +839,7 @@ fn view(_model: &Model) -> impl View<Msg> {
     markdown_editor(Msg::SubmitMarkdownHtml)
 }
 
-fn set_scroll(textarea: web_sys::HtmlTextAreaElement, preview: web_sys::HtmlElement) {
+fn set_scroll(textarea: HtmlTextAreaElement, preview: HtmlElement) {
     let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
     let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
     preview.set_scroll_top(new_scroll_top as i32);
@@ -848,9 +847,11 @@ fn set_scroll(textarea: web_sys::HtmlTextAreaElement, preview: web_sys::HtmlElem
 
 #[topo::nested]
 fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg> {
+    use web_sys::{HtmlElement, HtmlTextAreaElement};
+
     let source = use_state(|| String::new());
-    let preview_el = use_state::<ElRef<web_sys::HtmlElement>, _>(ElRef::default);
-    let textarea_el = use_state::<ElRef<web_sys::HtmlTextAreaElement>, _>(ElRef::default);
+    let preview_el = use_state::<ElRef<HtmlElement>, _>(ElRef::default);
+    let textarea_el = use_state::<ElRef<HtmlTextAreaElement>, _>(ElRef::default);
 
     let processed_md = markdown_to_html(&source.get(), &ComrakOptions::default());
 
@@ -858,11 +859,11 @@ fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) ->
         class!["flex flex-col"],
         div![
             class!["flex flex-row"],
-            div![class!("w-1/2"), "Markdown:"],
-            div![class!("w-1/2"), "Preview:"],
+            div![class!["w-1/2"], "Markdown:"],
+            div![class!["w-1/2"], "Preview:"],
         ],
         div![
-            class!["flex" "flex-row" "h-64"],
+            class!["flex flex-row h-64"],
             textarea![
                 el_ref(&textarea_el.get()),
                 bind(At::Value, source),
@@ -883,7 +884,7 @@ fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) ->
                 class!["md-preview"],
                 el_ref(&preview_el.get()),
                 class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
-                raw!(&processed_md)
+                md![source.get()]
             ]
         ],
         div![
