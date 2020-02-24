@@ -128,7 +128,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step3"],
-                "Step 3 -  Prettifying the Output",
+                "Step 3 - Prettifying the Output",
             ]],
             li![a![
                 class![
@@ -139,7 +139,18 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step4"],
-                "Step 4 - Message Submission",
+                "Step 4 - Adding auto scrolling",
+            ]],
+            li![a![
+                class![
+                    C.ml_2,
+                    C.hover__text_gray_100,
+                    C.border_b_2,
+                    C.border_transparent,
+                    C.hover__border_gray_300
+                ],
+                attrs![At::Href=>"tutorial#step4"],
+                "Step 5 - Adding Message Submission",
             ]],
         ],
     ]
@@ -230,15 +241,7 @@ What we are going to do in this section is
 ## Before we start 
 
 Currently **Seed Hooks** only work on nightly rust, this is due to requiring the feature `TrackCaller` therefore it is 
-important to install a recent nightly. **Furthermore as of 19th February there is a regression in nightly rust which prevents 
-`js_sys` and therefore `Seed` from compiling.  A fix is in the pipeline and waiting to be merged into the next Rust nightly.**
-
-Therefore to be safe use the verison.
-
-```
-rustup install nightly-2020-02-17
-rustup default nightly-2020-02-17
-```
+important to install a recently nightly. The below has been built with the nightly of 24th February 2020. 
 
 ## Download Quickstart
 
@@ -411,7 +414,7 @@ fn markdown_editor() -> Node<Msg> {
                 attrs![At::Type => "textbox"],
             ],
             div![
-                class!["md-preview bg-yellow-300 h-full flex-none w-1/2"],
+                class!["markdown-body bg-yellow-300 h-full flex-none w-1/2"],
             ]
         ],
         div![
@@ -496,7 +499,7 @@ enum Msg {
     NoOp,
 }
 
-impl std::default::Default for Msg {
+impl for Msg {
     fn default() -> Self {
         Msg::NoOp
     }
@@ -521,12 +524,13 @@ fn markdown_editor() -> Node<Msg> {
     ...
 
     div![
-        class!["md-preview bg-yellow-300 flex-none w-1/2"],
+        class!["markdown-body bg-yellow-300 h-full flex-none w-1/2"],
         source.get()
     ]
     ...
 ```
-Refreshing your browser now (`https://localhost:8000) and typing in the text area should out put the text directly within the preview `div`.
+Refreshing your browser now (`https://localhost:8000) and typing in the text area should out put the text directly within the 
+markdown preview `div`.
 
 "#
         ),
@@ -547,13 +551,13 @@ This is then directly output to the preview div.
 Instead of outputting directly to the preview div, we want it to be processed as markdown. 
 Fortunately Seed has an in-built macro that renders markdown from a `&str`.
 
-Simply wrap `source.get()` in `md![&source.get()` in the preview div:
+Simply wrap `source.get()` in `md![&source.get()` in the markdown preview div:
 
 ```
 // In in lib.rs...
 
 div![
-    class!["md-preview bg-yellow-300 flex-none w-1/2"],
+    class!["markdown-body bg-yellow-300 h-full flex-none w-1/2"],
     md![&source.get()]
 ]
 ```
@@ -576,7 +580,7 @@ fn markdown_editor() -> Node<Msg> {
                 attrs![At::Type => "textbox"],
             ],
             div![
-                class!["md-preview bg-yellow-300 h-full flex-none w-1/2"],
+                class!["markdown-body bg-yellow-300 h-full flex-none w-1/2"],
                 md![&source.get()]
             ]
         ],
@@ -596,19 +600,18 @@ fn markdown_editor() -> Node<Msg> {
 
 What we are going to do in this section is 
 
-1. Improve the styling of the component
-1. Learn how to use `ElRef`s to programatically access the dom.
-1. Add auto scrolling so the preview matches the textarea scroll location 
+1. Use a Github styled markdown CSS
+1. Fix content overlfows in the preview div
+1. Improve the visual look of the textarea
 
-### Preview & Textarea div
+### Github styled markdown CSS
 
 The UI currently is functional but it can be improved, specifically regarding the preview render.
 
 We therefore need to style both to better improve the UI.  TailwindCSS by default does a normalise
 pass on all styles. 
 
-We will use `github-markdown-css` for this, download the [markdown css file](https://raw.githubusercontent.com/sindresorhus/github-markdown-css/gh-pages/github-markdown.css)
-and place it in the project root. Next link to this stylesheet in `index.html`.
+We will use `github-markdown-css` for this, we can simply use the CDN version of this file:
 
 ```
 // in index.html
@@ -616,18 +619,27 @@ and place it in the project root. Next link to this stylesheet in `index.html`.
 <head>
     ...
     <link rel="stylesheet" type="text/css" href="output.css">
-    <link rel="stylesheet" href="github-markdown.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
     .... 
 ```
 
-all the class `markdown-body` to the preview div.
+Because we have already used the class `markdown-body` for our markdown preview div then the CSS should just work.
+
+1. Fix content overlfows in the preview div
+
+Currently the styled processed markdown will overflow the preview div. Therefore we need to ensure that `overflow` is set to auto
+for this div. Furthermore we can adjust the styling on the div for an improved look. Modify the existing `class!`s  as follows: 
 
 ```
 /// in lib.rs
 div![
-    class!["md-preview markdown-body"],
+    class!["markdown-body"],
+    class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
 ```
+
 This will ensure the preview pane's markdown is rendered correctly.
+
+### Improve the look of the text area
 
 Furthermore we woud like the `textarea` input to be mono-space. Therefore adjust it's class:
 
@@ -641,16 +653,6 @@ textarea![
 ],
 ```            
 
-Finally lets improve the look of the preview pane. Here I have used two `class!` macros to separate the 
-TailwindCss classes from specificly chosen classes.
-
-```
-div![
-    class!["md-preview markdown-body"],
-    class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
-    ...
-```
-
 Lets try how it all works now, save the file refresh the browser. Try typing the following into the text area: 
 
 ```
@@ -658,15 +660,19 @@ Lets try how it all works now, save the file refresh the browser. Try typing the
 
 **Yes** indeed it does *rock*.
 
-```
-
+```"#
+        ),
+        section_desc(
+            "step4",
+            "Step 4 - Adding auto scrolling",
+            r#"
 ### Auto scrolling the preview
 
 When we edit the text area we ideally would like the preview to scroll to a similar position. 
 This would enable our edits to be easier to see. Therefore we want to programatically scroll the md-preview div 
 on `KeyUp` and also on `Scroll` events.
 
-In order to do this we need to identify the md-preview and also the textarea with ElRefs. 
+In order to do this we need to identify the preview div and also the textarea with `ElRef`s. 
 These are Seed's way of identifying individual elements. 
 
 Due to the fact that we are going to refer to specific html elements via `web_sys` we need to add that as a dependency.
@@ -691,8 +697,8 @@ after the `let source = use_state..` line add two more use_state hooks.
 ```
 // In in lib.rs...
 
-let preview_el = use_state::<ElRef<HtmlElement>, _>(ElRef::default);
-let textarea_el = use_state::<ElRef<HtmlTextAreaElement>, _>(ElRef::default);
+let preview_el = use_state::(ElRef::<HtmlElement>::default);
+let textarea_el = use_state::(ElRef::<HtmlTextareaElement>::default);
 ```
 
 This provides access to two el_refs which we can later associate with specific elements. 
@@ -721,34 +727,107 @@ div![
 In order to set the respective scroll on the preview we use a simple percentage of textarea
 scroll as a guide.
 
-This is achieved via the following event handler:  
+This is achieved via the following event handler, add this to the button of the `textarea!`
+node:
 
 ```
 // In in lib.rs...
+textarea![
+    ...
 
-textarea_el.input_ev(Ev::KeyUp, move |el, _| {
-    if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-        let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
-        let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
-        preview.set_scroll_top(new_scroll_top as i32);
-    }
-}),
+    ...
+    textarea_el.input_ev(Ev::KeyUp, move |el, _| {
+        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+            let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
+            let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
+            preview.set_scroll_top(new_scroll_top as i32);
+        }
+    }),
+]
 ```
 
-We also add an identical EventHandler callback for an `Ev::Scroll` event.
+We also add an identical EventHandler callback for an `Ev::Scroll` event.  You could cut and paste the code above
+however we can prevent needless repretition by using a function.  
 
-Once all the above is completed. scrolling and cursor navigating through the textarea will 
-result in a corrsponding scroll of the preview div.
+
+First remove the EventHandler above and add the following function to `lib.rs`.
+
+```
+//in lib.rs 
+
+fn scroll_event_hander(event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
+    preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
+        
+    textarea_el.input_ev(event, move |el, _| {
+
+        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+            let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
+            let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
+            preview.set_scroll_top(new_scroll_top as i32);
+        }
+    })
+}
+
+```
+
+Finally the following two lines at the bottom of the `textarea!` will generate the correct event handlers:
+
+```
+//in lib.rs  
+
+textarea![
+    ...
+
+    ... 
+    scroll_event_hander(Ev::KeyUp ,textarea_el, preview_el),
+    scroll_event_hander(Ev::Scroll, textarea_el, preview_el),
+
+]
+```
+
+Once all the above is completed, scrolling and cursor navigating through the textarea will 
+result in a corresponding scroll of the preview div.
+
+
+Try pasting the following into the textarea and try scrolling or moving the cursor around:
+
+```
+* this
+* is
+* a 
+* very
+* long
+* list
+* that
+* goes
+* on
+* and
+  1. on
+  1. and
+  1. on
+  1. it
+* Should
+* demonstrate
+* Auto scrolling the preview 
+* in response to 
+* scrolling of the 
+* text area
+* and cursor movement
+
+```
+
 "#
         ),
         section_desc(
-            "step4",
-            "Step 4 - Message Submission",
+            "step5",
+            "Step 5 - Message Submission",
             r#"
 The final step is to modify the function signature to allow an arbiatry message to be passed.
 This message will then be sent to seed on pressing of the submit button. 
 
-The message should permit a String argument. Hence we will use the following: 
+The message should permit a String argument which should be the content of the rendered markdown. 
+Hence we will use the following: 
 
 ```
 // In in lib.rs...
@@ -775,7 +854,13 @@ Finally we add an `Ev::Click` event handler to the submit button.
 button![
     class!["bg-green-400 p-4 m-2"],
     "Submit",
-    mouse_ev(Ev::Click, move |_| msg_handler(processed_md))
+    mouse_ev(Ev::Click, move |_| {
+        if let Some(markdown_element) = preview_el.get().get(){
+            msg_handler(markdown_element.inner_html())
+        } else {
+            msg_handler(String::new())
+        }
+    })
 ]
 ```
 
@@ -797,9 +882,13 @@ logged to the console from the Seed update function.
 
 ### Final Thoughts
 
-Overall the component fufills the brief, obviously there are visual areas for improvement.  Performance-wise there are some
-considerations. In a heavy page (such as this one) where the virtual dom is completely re-diffed every update
-the component may appear sluggish. 
+Overall the component fufills the brief, obviously there are visual areas for improvement. 
+
+The auto-scrolling works pretty well however when the markdown rendered font is large and many
+lines are created the linking is not perfect. This could be improved by looking at the syncing code. 
+
+Performance-wise there are some considerations. In a heavy page where a complex 
+virtual dom is completely re-diffed every update the component may appear sluggish. 
 
 Some ways to deal with this situation including making use of Seed's `Keyed` updates to limit dom patching to a specific element
 or rendering the markdown directly to the dom in an `after_render` callback.
@@ -810,8 +899,9 @@ The final `lib.rs` file is below:
 #![feature(track_caller)]
 use comp_state::*;
 use comp_state_seed_extras::*;
-use comrak::{markdown_to_html, ComrakOptions};
 use seed::{prelude::*, *};
+use web_sys::HtmlElement;
+use web_sys::HtmlTextAreaElement;
 
 #[derive(Default)]
 struct Model {}
@@ -839,60 +929,62 @@ fn view(_model: &Model) -> impl View<Msg> {
     markdown_editor(Msg::SubmitMarkdownHtml)
 }
 
-fn set_scroll(textarea: HtmlTextAreaElement, preview: HtmlElement) {
-    let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
-    let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
-    preview.set_scroll_top(new_scroll_top as i32);
+fn scroll_event_hander(event: Ev,
+        textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
+        preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
+            textarea_el.input_ev(event, move |el, _| {
+        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+            let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
+            let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
+            preview.set_scroll_top(new_scroll_top as i32);
+        }
+    })
 }
 
 #[topo::nested]
 fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg> {
-    use web_sys::{HtmlElement, HtmlTextAreaElement};
-
     let source = use_state(|| String::new());
-    let preview_el = use_state::<ElRef<HtmlElement>, _>(ElRef::default);
-    let textarea_el = use_state::<ElRef<HtmlTextAreaElement>, _>(ElRef::default);
+    let preview_el = use_state(ElRef::<HtmlElement>::default);
+    let textarea_el = use_state(ElRef::<HtmlTextAreaElement>::default);
 
-    let processed_md = markdown_to_html(&source.get(), &ComrakOptions::default());
+    
 
     div![
         class!["flex flex-col"],
         div![
             class!["flex flex-row"],
-            div![class!["w-1/2"], "Markdown:"],
-            div![class!["w-1/2"], "Preview:"],
+            div![class!("w-1/2"), "Markdown :"],
+            div![class!("w-1/2"), "Preview:"],
         ],
         div![
-            class!["flex flex-row h-64"],
+            class!["flex" "flex-row" "h-64"],
             textarea![
                 el_ref(&textarea_el.get()),
                 bind(At::Value, source),
                 class!["font-mono p-2 h-full flex-none w-1/2 border-gray-200 border shadow-lg"],
                 attrs![At::Type => "textbox"],
-                textarea_el.input_ev(Ev::KeyUp, move |el, _| {
-                    if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-                        set_scroll(textarea, preview);
-                    }
-                }),
-                textarea_el.input_ev(Ev::Scroll, move |el, _| {
-                    if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-                        set_scroll(textarea, preview);
-                    }
-                })
+                scroll_event_hander(Ev::KeyUp ,textarea_el, preview_el),
+                scroll_event_hander(Ev::Scroll, textarea_el, preview_el),
             ],
             div![
-                class!["md-preview markdown-body"],
+                class!["markdown-body"],
                 el_ref(&preview_el.get()),
                 class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
-                md![source.get()]
+                md![&source.get()]
             ]
         ],
         div![
             class!["flex justify-end pt-2"],
             button![
-                class!["bg-green-400 rounded-lg p-4 m-2"],
+                class!["bg-green-400 p-4 m-2"],
                 "Submit",
-                mouse_ev(Ev::Click, move |_| msg_handler(processed_md))
+                mouse_ev(Ev::Click, move |_| {
+                    if let Some(markdown_element) = preview_el.get().get(){
+                        msg_handler(markdown_element.inner_html())
+                    } else {
+                        msg_handler(String::new())
+                    }
+                })
             ]
         ]
     ]
@@ -908,3 +1000,8 @@ pub fn render() {
         ),
     ]
 }
+
+//class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray_200 bg-indigo-100 border shadow-lg"],
+
+// 1. Learn how to use `ElRef`s to programatically access the dom.
+// 1. Add auto scrolling so the preview matches the textarea scroll location
