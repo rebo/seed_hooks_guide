@@ -149,7 +149,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.border_transparent,
                     C.hover__border_gray_300
                 ],
-                attrs![At::Href=>"tutorial#step4"],
+                attrs![At::Href=>"tutorial#step5"],
                 "Step 5 - Adding Message Submission",
             ]],
         ],
