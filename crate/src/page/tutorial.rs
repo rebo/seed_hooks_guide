@@ -152,6 +152,17 @@ fn left_bar_content() -> Node<Msg> {
                 attrs![At::Href=>"tutorial#step5"],
                 "Step 5 - Adding Message Submission",
             ]],
+            li![a![
+                class![
+                    C.ml_2,
+                    C.hover__text_gray_100,
+                    C.border_b_2,
+                    C.border_transparent,
+                    C.hover__border_gray_300
+                ],
+                attrs![At::Href=>"tutorial#step6"],
+                "Step 6 - Reusing the markdown editor",
+            ]],
         ],
     ]
 }
@@ -233,23 +244,35 @@ To assist checking progress in this tutorial please see here for the [final code
 
 What we are going to do in this section is 
 
-1. Install nightly rust
-1. Clone Seed quickstart
+1. Clone and run the Seed quickstart
+1. Install and setup nightly Rust for this project
 1. Install TailwindCSS
 1. Setup Seed Hooks
 
 ## Before we start 
 
-Currently **Seed Hooks** only work on nightly rust, this is due to requiring the feature `TrackCaller` therefore it is 
-important to install a recently nightly. The below has been built with the nightly of 24th February 2020. 
 
-## Download Quickstart
+## Clone and run the Seed quickstart
 
 Clone the Seed basic quick start:
 
 ```
 git clone https://github.com/seed-rs/seed-quickstart markdown-editor
 cd markdown-editor
+```
+
+To run this quickstart project you need cargo-make installed:
+
+```
+cargo install --force cargo-make
+```
+This will install cargo-make in your ~/.cargo/bin.
+Make sure to add ~/.cargo/bin directory to your PATH variable.
+
+You will also need to ensure that Rust can target wasm by adding this component:
+
+```
+rustup target add wasm32-unknown-unknown
 ```
 
 Check it compiles and serves correctly with 
@@ -259,6 +282,17 @@ cargo make build; cargo make serve
 ```
 
 You can access the site from `http://localhost:8000`. This will display a simple button counter.
+
+Currently **Seed Hooks** only work on nightly rust, this is due to requiring the feature `TrackCaller` therefore it is 
+important to install a recently nightly. The below has been built with the nightly of 24th February 2020. 
+
+To install nightly rust do this:
+
+```
+rustup install nightly
+```
+
+To ensure that nightly is used for only this project add a `rust-toolchain` file to the project root, the contents of this file should be the single line `nightly`. 
 
 ## CSS 
 
@@ -363,7 +397,7 @@ struct Model {}
 
 enum Msg {}
 
-fn update(_msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {}
+fn update(msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {}
 
 #[topo::nested]
 fn view(_model: &Model) -> impl View<Msg> {
@@ -393,7 +427,7 @@ What we are going to do in this section is
 1. Ensure state can be outputted into a preview div
 
 Visually we want a split view, the left effectively being one big textbox, the right being a preview render of the markdown.
-We also want a submit button on the button along the bottom. Something like this (for now we will ignore message requirement.)
+We also want a submit button below both these panes. Add the below code to `lib.rs` to setup the above layout.
 
 
 ```
@@ -419,22 +453,23 @@ fn markdown_editor() -> Node<Msg> {
         ],
         div![
             class!["flex justify-end pt-2"],
-            button![class!["bg-green-400 p-4 m-2"], "Submit"]
+            button![class!["bg-green-400 p-4 m-2"], "Submit (See console log)"]
         ]
     ]
 } 
 ```
+The reason we annotate with `#[topo::nested]` is so that markdown_editor can operate as its own component with local state. 
 
 This component can be rendered by calling it in the root view... 
 
 ```
 #[topo::nested]
 fn view(_model: &Model) -> impl View<Msg> {
-    markdown_editor(Msg::SubmitMarkdownHtml)
+    markdown_editor()
 }
 ```
 
-The reason we annotate with `#[topo::nested]` is so that markdown_editor can operate as its own component with local state. 
+Currently nothing in the page is functional, this is only for setting up the layout.
 
 ### Cargo Watch
 
@@ -499,7 +534,7 @@ enum Msg {
     NoOp,
 }
 
-impl for Msg {
+impl Default for Msg {
     fn default() -> Self {
         Msg::NoOp
     }
@@ -529,7 +564,7 @@ fn markdown_editor() -> Node<Msg> {
     ]
     ...
 ```
-Refreshing your browser now (`https://localhost:8000) and typing in the text area should out put the text directly within the 
+Refreshing your browser now (`https://localhost:8000`) and typing in the text area should out put the text directly within the 
 markdown preview `div`.
 
 "#
@@ -551,14 +586,14 @@ This is then directly output to the preview div.
 Instead of outputting directly to the preview div, we want it to be processed as markdown. 
 Fortunately Seed has an in-built macro that renders markdown from a `&str`.
 
-Simply wrap `source.get()` in `md![&source.get()` in the markdown preview div:
+Simply wrap `source.get()` in `md!(&source.get())` in the markdown preview div:
 
 ```
 // In in lib.rs...
 
 div![
     class!["markdown-body bg-yellow-300 h-full flex-none w-1/2"],
-    md![&source.get()]
+    md!(&source.get())
 ]
 ```
 
@@ -574,6 +609,11 @@ fn markdown_editor() -> Node<Msg> {
         class!["flex flex-col"],
         div![
             class!["flex flex-row h-40"],
+            div![
+                class!["flex flex-row"],
+                div![class!["w-1/2"], "Markdown:"],
+                div![class!["w-1/2"], "Preview:"],
+            ],
             textarea![
                 bind(At::Value, source),
                 class!["bg-red-300 h-full flex-none w-1/2"],
@@ -581,12 +621,12 @@ fn markdown_editor() -> Node<Msg> {
             ],
             div![
                 class!["markdown-body bg-yellow-300 h-full flex-none w-1/2"],
-                md![&source.get()]
+                md!(&source.get())
             ]
         ],
         div![
             class!["flex justify-end pt-2"],
-            button![class!["bg-green-400 p-4 m-2"], "Submit"]
+            button![class!["bg-green-400 p-4 m-2"], "Submit (See console log)"]
         ]
     ]
 }
@@ -601,7 +641,7 @@ fn markdown_editor() -> Node<Msg> {
 What we are going to do in this section is 
 
 1. Use a Github styled markdown CSS
-1. Fix content overlfows in the preview div
+1. Fix content overflows in the preview div
 1. Improve the visual look of the textarea
 
 ### Github styled markdown CSS
@@ -625,7 +665,7 @@ We will use `github-markdown-css` for this, we can simply use the CDN version of
 
 Because we have already used the class `markdown-body` for our markdown preview div then the CSS should just work.
 
-1. Fix content overlfows in the preview div
+1. Fix content overflows in the preview div
 
 Currently the styled processed markdown will overflow the preview div. Therefore we need to ensure that `overflow` is set to auto
 for this div. Furthermore we can adjust the styling on the div for an improved look. Modify the existing `class!`s  as follows: 
@@ -641,7 +681,7 @@ This will ensure the preview pane's markdown is rendered correctly.
 
 ### Improve the look of the text area
 
-Furthermore we woud like the `textarea` input to be mono-space. Therefore adjust it's class:
+Furthermore we woud like the `textarea` input to be mono-space. Therefore adjust its class:
 
 ```
 // In in lib.rs...
@@ -669,7 +709,7 @@ Lets try how it all works now, save the file refresh the browser. Try typing the
 ### Auto scrolling the preview
 
 When we edit the text area we ideally would like the preview to scroll to a similar position. 
-This would enable our edits to be easier to see. Therefore we want to programatically scroll the md-preview div 
+This would enable our edits to be easier to see. Therefore we want to programatically scroll the `markdown-body` div 
 on `KeyUp` and also on `Scroll` events.
 
 In order to do this we need to identify the preview div and also the textarea with `ElRef`s. 
@@ -682,7 +722,7 @@ In `Cargo.toml` add the following to the dependencies section:
 ```
 [dependencies]
 ...
-web-sys = "^0.3.32"
+web-sys = "0.3.35"
 ...
 ```
 
@@ -697,8 +737,8 @@ after the `let source = use_state..` line add two more use_state hooks.
 ```
 // In in lib.rs...
 
-let preview_el = use_state::(ElRef::<HtmlElement>::default);
-let textarea_el = use_state::(ElRef::<HtmlTextareaElement>::default);
+let preview_el = use_state(ElRef::<HtmlElement>::default);
+let textarea_el = use_state(ElRef::<HtmlTextareaElement>::default);
 ```
 
 This provides access to two el_refs which we can later associate with specific elements. 
@@ -719,8 +759,8 @@ and
 // In in lib.rs...
 
 div![
-    class!["md-preview"],
     el_ref(&preview_el.get()),
+    class!["markdown-body"],
     ...
 ```
 
@@ -755,18 +795,30 @@ First remove the EventHandler above and add the following function to `lib.rs`.
 ```
 //in lib.rs 
 
-fn scroll_event_hander(event: Ev,
+fn scroll_event_handler(event: Ev,
     textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
     preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
-        
-    textarea_el.input_ev(event, move |el, _| {
-
-        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-            let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
-            let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
-            preview.set_scroll_top(new_scroll_top as i32);
-        }
-    })
+        event: Ev,
+        textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+        preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
+    
+        textarea_el.input_ev(event, move |el, _| {
+            if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+                let textarea_scroll_percentage = {
+                    let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
+                    if textarea_max_scroll_top == 0 {
+                        0.
+                    } else {
+                        f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
+                    }
+                };
+                let new_preview_scroll_top = {
+                    let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
+                    f64::from(preview_max_scroll_top) * textarea_scroll_percentage
+                };
+                preview.set_scroll_top(new_preview_scroll_top as i32);
+            }
+        })
 }
 
 ```
@@ -780,8 +832,8 @@ textarea![
     ...
 
     ... 
-    scroll_event_hander(Ev::KeyUp ,textarea_el, preview_el),
-    scroll_event_hander(Ev::Scroll, textarea_el, preview_el),
+    scroll_event_handler(Ev::KeyUp ,textarea_el, preview_el),
+    scroll_event_handler(Ev::Scroll, textarea_el, preview_el),
 
 ]
 ```
@@ -832,7 +884,7 @@ Hence we will use the following:
 ```
 // In in lib.rs...
 
-fn markdown_editor(msg_handler: impl FnOnce(String) -> Ms + 'static + Clone) -> Node<Msg>
+fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg>
 ```
 
 We modify the `Msg` type to allow for one of these. 
@@ -853,18 +905,18 @@ Finally we add an `Ev::Click` event handler to the submit button.
 
 button![
     class!["bg-green-400 p-4 m-2"],
-    "Submit",
+    "Submit (See console log)"],
     mouse_ev(Ev::Click, move |_| {
         if let Some(markdown_element) = preview_el.get().get(){
-            msg_handler(markdown_element.inner_html())
+            on_submit(markdown_element.inner_html())
         } else {
-            msg_handler(String::new())
+            on_submit(String::new())
         }
     })
 ]
 ```
 
-and handle it in the `update()` function :
+we handle this message in the `update()` function. Then finally tweak the calling function in the `view`:
 
 ```
 // In in lib.rs...
@@ -875,23 +927,15 @@ fn update(msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {
         Msg::NoOp => {}
     }
 } 
+
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    markdown_editor(Msg::SubmitMarkdownHtml)
+}
 ```
 
-So finally when the form button is clicked, an output of the processed html will be
+Now when the form button is clicked, an output of the processed html will be
 logged to the console from the Seed update function.
-
-### Final Thoughts
-
-Overall the component fufills the brief, obviously there are visual areas for improvement. 
-
-The auto-scrolling works pretty well however when the markdown rendered font is large and many
-lines are created the linking is not perfect. This could be improved by looking at the syncing code. 
-
-Performance-wise there are some considerations. In a heavy page where a complex 
-virtual dom is completely re-diffed every update the component may appear sluggish. 
-
-Some ways to deal with this situation including making use of Seed's `Keyed` updates to limit dom patching to a specific element
-or rendering the markdown directly to the dom in an `after_render` callback.
 
 The final `lib.rs` file is below:
 
@@ -930,19 +974,35 @@ fn view(_model: &Model) -> impl View<Msg> {
 }
 
 fn scroll_event_hander(event: Ev,
+    fn scroll_event_handler(event: Ev,
         textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
         preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
+            event: Ev,
+            textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+            preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
+        
             textarea_el.input_ev(event, move |el, _| {
-        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-            let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
-            let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
-            preview.set_scroll_top(new_scroll_top as i32);
-        }
-    })
+                if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+                    let textarea_scroll_percentage = {
+                        let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
+                        if textarea_max_scroll_top == 0 {
+                            0.
+                        } else {
+                            f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
+                        }
+                    };
+                    let new_preview_scroll_top = {
+                        let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
+                        f64::from(preview_max_scroll_top) * textarea_scroll_percentage
+                    };
+                    preview.set_scroll_top(new_preview_scroll_top as i32);
+                }
+            })
+    }
 }
 
 #[topo::nested]
-fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg> {
+fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg> {
     let source = use_state(|| String::new());
     let preview_el = use_state(ElRef::<HtmlElement>::default);
     let textarea_el = use_state(ElRef::<HtmlTextAreaElement>::default);
@@ -970,7 +1030,7 @@ fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) ->
                 class!["markdown-body"],
                 el_ref(&preview_el.get()),
                 class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
-                md![&source.get()]
+                md!(&source.get())
             ]
         ],
         div![
@@ -979,10 +1039,10 @@ fn markdown_editor(msg_handler: impl FnOnce(String) -> Msg + 'static + Clone) ->
                 class!["bg-green-400 p-4 m-2"],
                 "Submit",
                 mouse_ev(Ev::Click, move |_| {
-                    if let Some(markdown_element) = preview_el.get().get(){
-                        msg_handler(markdown_element.inner_html())
+                    if let Some(preview_element) = preview_el.get().get(){
+                        on_submit(preview_element.inner_html())
                     } else {
-                        msg_handler(String::new())
+                        on_submit(String::new())
                     }
                 })
             ]
@@ -997,6 +1057,89 @@ pub fn render() {
 
 ```
     "#
+        ),
+        section_desc(
+            "step6",
+            "Step 6 - Reusing the Markdown Editor",
+            r#"
+So far we have created a functional live markdown editor with local state
+which stores, processes, and renders the markdown source in a preview pane.
+
+This editor can be re-used freely in the current Seed app by simply calling the `markdown_edtior` function
+freely multiple times.  For instance changing the view to the following creates 4 markdown editors
+all of which function independently.
+
+```
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    div![
+        markdown_editor(Msg::SubmitMarkdownHtml),
+        markdown_editor(Msg::SubmitMarkdownHtml),
+        markdown_editor(Msg::SubmitMarkdownHtml),
+        markdown_editor(Msg::SubmitMarkdownHtml),
+    ]
+
+}
+```
+
+However there is an issue if we want to re-use this component in a different app. This is because the component
+currently relies on specifically a `Msg` type to be used as the `on_submit` and in the return type as part of a `Node<Msg>`.
+
+We therefore need to adjust the code to allow for this function to be freely re-used in any Seed application.
+
+In order to do this we will make the function generic over the Msg type.
+
+Change the `markdown-editor` function signature as follows:
+
+```
+fn markdown_editor<Ms, F>(on_submit:F) -> Node<Ms> where
+    F: FnOnce(String) -> Ms + 'static + Clone ,
+    Ms: Default + 'static {
+    ...
+```
+What we have done is create a generic function rather than a function that is specific for our app's `Msg` type.
+The `Ms` type is a type parameter that we supply to the function to tell it what message type it should use.
+
+Because `Ms` will be used in `bind` it must implement Default, therefore we state that `Ms` must have this trait bound.
+
+We also need to ensure that all parts of our compoment refer to this generic `Ms` type.
+
+If you look in the function body of `markdown_editor` you will not see any `<Msg>` referenced directly,
+and therefore might think that no further changes are needed. However have a look again at the `scroll_event_handler` funcitons: 
+
+```
+
+fn scroll_event_handler(event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
+    preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg>
+```
+
+This return an `EventHandler<Msg>` and the `Msg` is concrete here!
+
+To fix we simply use a generic type parameter here as well. So replace the signature with the below:  
+
+```
+fn scroll_event_handler<Ms>(event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
+    preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Ms> where Ms: 'static + Default{
+```
+
+Now the function will use the `Ms` type that is used by `markdown_editor<Ms,_>`. Rust is smart enough to
+realise that it has to use the same `Ms` type. 
+
+Once the above changes are made then we can call our markdown_edtior as below and use it freely in any Seed app.
+
+```
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    markdown_editor(Msg::SubmitMarkdownHtml)
+}
+```
+
+The great thing is because the `Ms` type is defined by the arguement passed to `on_submit` (in this case `Msg::SubmitMarkdownHtml`) **we dont actually have to 
+explicitly state the message type to be used**. Our api surface is clean and easy to use!.
+
+"#
         ),
     ]
 }
