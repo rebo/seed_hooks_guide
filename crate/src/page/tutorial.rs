@@ -264,7 +264,7 @@ cd markdown-editor
 To run this quickstart project you need cargo-make installed:
 
 ```
-cargo install --force cargo-make
+cargo install cargo-make
 ```
 This will install cargo-make in your ~/.cargo/bin.
 Make sure to add ~/.cargo/bin directory to your PATH variable.
@@ -322,10 +322,17 @@ Next create a `styles.css` in the project root with these contents:
 
 @tailwind base;
 
+.markdown-body ol, .markdown-body ul {
+    list-style-type: unset;
+}
+
 @tailwind components;
 
 @tailwind utilities;
 ```
+
+The ".markdown-body" classes are needed later because Tailwind removes bullet points 
+which is needed for rendering `<li>` tags.
 
 Now build the tailwindCSS with 
 
@@ -510,7 +517,7 @@ fn markdown_editor() -> Node<Msg> {
     let source = use_state(|| String::new());
     ...
 ```
-This creates a **state variable** accessor `source` this accessor is used to get and set some `String` data associated with this component. 
+This creates a **state variable** accessor `source`. This accessor is used to get and set some `String` data associated with this component. 
 
 Next we need to bind this source to the `value` attribute of the textarea. Modify the `textarea!` to include this a bind directive.
 
@@ -564,7 +571,7 @@ fn markdown_editor() -> Node<Msg> {
     ]
     ...
 ```
-Refreshing your browser now (`https://localhost:8000`) and typing in the text area should out put the text directly within the 
+Refreshing your browser now (`https://localhost:8000`) and typing in the text area should output the text directly within the 
 markdown preview `div`.
 
 "#
@@ -600,7 +607,6 @@ div![
 Here is the final `markdown_editor` function at this stage. 
 
 ```
-// In in lib.rs...
 #[topo::nested]
 fn markdown_editor() -> Node<Msg> {
     let source = use_state(|| String::new());
@@ -608,12 +614,12 @@ fn markdown_editor() -> Node<Msg> {
     div![
         class!["flex flex-col"],
         div![
-            class!["flex flex-row h-40"],
-            div![
-                class!["flex flex-row"],
-                div![class!["w-1/2"], "Markdown:"],
-                div![class!["w-1/2"], "Preview:"],
-            ],
+            class!["flex flex-row"],
+            div![class!["w-1/2"], "Markdown:"],
+            div![class!["w-1/2"], "Preview:"],
+        ],
+        div![
+            class!["flex flex-row h-64"],
             textarea![
                 bind(At::Value, source),
                 class!["bg-red-300 h-full flex-none w-1/2"],
@@ -738,7 +744,7 @@ after the `let source = use_state..` line add two more use_state hooks.
 // In in lib.rs...
 
 let preview_el = use_state(ElRef::<HtmlElement>::default);
-let textarea_el = use_state(ElRef::<HtmlTextareaElement>::default);
+let textarea_el = use_state(ElRef::<HtmlTextAreaElement>::default);
 ```
 
 This provides access to two el_refs which we can later associate with specific elements. 
@@ -786,41 +792,42 @@ textarea![
 ]
 ```
 
-We also add an identical EventHandler callback for an `Ev::Scroll` event.  You could cut and paste the code above
+There are some issues with this simple percentage based scroll above. For markup that 
+results in larger rendered markdown, such as headers, the scrolling will not perfectly match up.
+
+Furthermore we also need an identical EventHandler callback for an `Ev::Scroll` event.  You could cut and paste code above
 however we can prevent needless repretition by using a function.  
 
+We fix both ehse issues by using the code below.
 
 First remove the EventHandler above and add the following function to `lib.rs`.
 
 ```
 //in lib.rs 
 
-fn scroll_event_handler(event: Ev,
-    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
-    preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
-        event: Ev,
-        textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
-        preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
-    
-        textarea_el.input_ev(event, move |el, _| {
-            if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-                let textarea_scroll_percentage = {
-                    let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
-                    if textarea_max_scroll_top == 0 {
-                        0.
-                    } else {
-                        f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
-                    }
-                };
-                let new_preview_scroll_top = {
-                    let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
-                    f64::from(preview_max_scroll_top) * textarea_scroll_percentage
-                };
-                preview.set_scroll_top(new_preview_scroll_top as i32);
-            }
-        })
+fn scroll_event_handler(
+    event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+    preview_el: StateAccess<ElRef<HtmlElement>>
+) -> EventHandler<Msg> {
+    textarea_el.input_ev(event, move |el, _| {
+        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+            let textarea_scroll_percentage = {
+                let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
+                if textarea_max_scroll_top == 0 {
+                    0.
+                } else {
+                    f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
+                }
+            };
+            let new_preview_scroll_top = {
+                let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
+                f64::from(preview_max_scroll_top) * textarea_scroll_percentage
+            };
+            preview.set_scroll_top(new_preview_scroll_top as i32);
+        }
+    })
 }
-
 ```
 
 Finally the following two lines at the bottom of the `textarea!` will generate the correct event handlers:
@@ -905,7 +912,7 @@ Finally we add an `Ev::Click` event handler to the submit button.
 
 button![
     class!["bg-green-400 p-4 m-2"],
-    "Submit (See console log)"],
+    "Submit (See console log)",
     mouse_ev(Ev::Click, move |_| {
         if let Some(markdown_element) = preview_el.get().get(){
             on_submit(markdown_element.inner_html())
@@ -944,8 +951,8 @@ The final `lib.rs` file is below:
 use comp_state::*;
 use comp_state_seed_extras::*;
 use seed::{prelude::*, *};
-use web_sys::HtmlElement;
-use web_sys::HtmlTextAreaElement;
+use web_sys::{HtmlElement, HtmlTextAreaElement};
+
 
 #[derive(Default)]
 struct Model {}
@@ -955,7 +962,7 @@ enum Msg {
     SubmitMarkdownHtml(String),
 }
 
-impl std::default::Default for Msg {
+impl Default for Msg {
     fn default() -> Self {
         Msg::NoOp
     }
@@ -973,62 +980,32 @@ fn view(_model: &Model) -> impl View<Msg> {
     markdown_editor(Msg::SubmitMarkdownHtml)
 }
 
-fn scroll_event_hander(event: Ev,
-    fn scroll_event_handler(event: Ev,
-        textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
-        preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
-            event: Ev,
-            textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
-            preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg> {
-        
-            textarea_el.input_ev(event, move |el, _| {
-                if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-                    let textarea_scroll_percentage = {
-                        let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
-                        if textarea_max_scroll_top == 0 {
-                            0.
-                        } else {
-                            f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
-                        }
-                    };
-                    let new_preview_scroll_top = {
-                        let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
-                        f64::from(preview_max_scroll_top) * textarea_scroll_percentage
-                    };
-                    preview.set_scroll_top(new_preview_scroll_top as i32);
-                }
-            })
-    }
-}
-
 #[topo::nested]
 fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg> {
     let source = use_state(|| String::new());
     let preview_el = use_state(ElRef::<HtmlElement>::default);
     let textarea_el = use_state(ElRef::<HtmlTextAreaElement>::default);
 
-    
-
     div![
         class!["flex flex-col"],
         div![
             class!["flex flex-row"],
-            div![class!("w-1/2"), "Markdown :"],
-            div![class!("w-1/2"), "Preview:"],
+            div![class!["w-1/2"], "Markdown:"],
+            div![class!["w-1/2"], "Preview:"],
         ],
         div![
-            class!["flex" "flex-row" "h-64"],
+            class!["flex flex-row h-64"],
             textarea![
                 el_ref(&textarea_el.get()),
                 bind(At::Value, source),
                 class!["font-mono p-2 h-full flex-none w-1/2 border-gray-200 border shadow-lg"],
                 attrs![At::Type => "textbox"],
-                scroll_event_hander(Ev::KeyUp ,textarea_el, preview_el),
-                scroll_event_hander(Ev::Scroll, textarea_el, preview_el),
+                scroll_event_handler(Ev::KeyUp ,textarea_el, preview_el),
+                scroll_event_handler(Ev::Scroll, textarea_el, preview_el),
             ],
             div![
-                class!["markdown-body"],
                 el_ref(&preview_el.get()),
+                class!["markdown-body"],
                 class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
                 md!(&source.get())
             ]
@@ -1037,10 +1014,10 @@ fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> N
             class!["flex justify-end pt-2"],
             button![
                 class!["bg-green-400 p-4 m-2"],
-                "Submit",
+                "Submit (See console log)",
                 mouse_ev(Ev::Click, move |_| {
-                    if let Some(preview_element) = preview_el.get().get(){
-                        on_submit(preview_element.inner_html())
+                    if let Some(markdown_element) = preview_el.get().get(){
+                        on_submit(markdown_element.inner_html())
                     } else {
                         on_submit(String::new())
                     }
@@ -1048,6 +1025,30 @@ fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> N
             ]
         ]
     ]
+}
+
+fn scroll_event_handler(
+    event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+    preview_el: StateAccess<ElRef<HtmlElement>>
+) -> EventHandler<Msg> {
+    textarea_el.input_ev(event, move |el, _| {
+        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+            let textarea_scroll_percentage = {
+                let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
+                if textarea_max_scroll_top == 0 {
+                    0.
+                } else {
+                    f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
+                }
+            };
+            let new_preview_scroll_top = {
+                let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
+                f64::from(preview_max_scroll_top) * textarea_scroll_percentage
+            };
+            preview.set_scroll_top(new_preview_scroll_top as i32);
+        }
+    })
 }
 
 #[wasm_bindgen(start)]
@@ -1106,7 +1107,7 @@ Because `Ms` will be used in `bind` it must implement Default, therefore we stat
 We also need to ensure that all parts of our component refer to this generic `Ms` type.
 
 If you look in the function body of `markdown_editor` you will not see any `Msg` type referenced directly,
-and therefore might think that no further changes are needed. However have a look again at the `scroll_event_handler` functions: 
+and therefore you might think that no further changes are needed. However have a look again at the `scroll_event_handler` function: 
 
 ```
 
@@ -1138,7 +1139,25 @@ fn view(_model: &Model) -> impl View<Msg> {
 ```
 
 The great thing is because the `Ms` type is defined by the argument passed to `on_submit` (in this case `Msg::SubmitMarkdownHtml`) **we dont actually have to 
-explicitly state the message type to be used**. Our api surface is clean and easy to use!.
+explicitly state the message type to be used**. Our api surface is clean and easy to use.
+
+### Taking the widget further.  
+
+As it stands the widget is composable, versitile and fulfills the brief.   It can be
+freely used in any Seed project (as long as hooks have been enabled) and can be rendered to the 
+view with a simple function call. 
+
+That said, it could be extended in a number of ways.  Here are some ideas:
+
+* Configurable styling / theme. 
+* A "Cancel" button along with associated Seed messaging.  
+* Buttons and shortcuts to quickly add things like bolding text. I.e. a short cut that bolds
+the highlighted word on `CTRL/CMD-B`.
+* A "Reset" button that clears the edit pane.
+* A Seed Hooks version - instead of taking a `Msg` argument it takes a Seed Hooks state accessor. 
+The widget then updates the accessor's state variable on submit.
+* A version with a 'preview' and 'edit' tab instead of side by side panes.  
+* Markdown source syntax highlighting to make the source more readable.
 
 "#
         ),
