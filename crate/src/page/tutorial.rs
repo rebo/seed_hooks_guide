@@ -1065,7 +1065,7 @@ pub fn render() {
 So far we have created a functional live markdown editor with local state
 which stores, processes, and renders the markdown source in a preview pane.
 
-This editor can be re-used freely in the current Seed app by simply calling the `markdown_edtior` function
+This editor can be re-used freely in the current Seed app by simply calling the `markdown_editor` function
 freely multiple times.  For instance changing the view to the following creates 4 markdown editors
 all of which function independently.
 
@@ -1083,11 +1083,12 @@ fn view(_model: &Model) -> impl View<Msg> {
 ```
 
 However there is an issue if we want to re-use this component in a different app. This is because the component
-currently relies on specifically a `Msg` type to be used as the `on_submit` and in the return type as part of a `Node<Msg>`.
+currently relies on specifically that the `Msg` type to be used as the `on_submit` argument and in the return type as part of a `Node<Msg>`.
 
-We therefore need to adjust the code to allow for this function to be freely re-used in any Seed application.
+We therefore need to adjust the code to allow for this function to be freely re-used in any Seed application that may use a completely different
+message type.  
 
-In order to do this we will make the function generic over the Msg type.
+In order to do this we will make the function generic over the message type.
 
 Change the `markdown-editor` function signature as follows:
 
@@ -1102,10 +1103,10 @@ The `Ms` type is a type parameter that we supply to the function to tell it what
 
 Because `Ms` will be used in `bind` it must implement Default, therefore we state that `Ms` must have this trait bound.
 
-We also need to ensure that all parts of our compoment refer to this generic `Ms` type.
+We also need to ensure that all parts of our component refer to this generic `Ms` type.
 
-If you look in the function body of `markdown_editor` you will not see any `<Msg>` referenced directly,
-and therefore might think that no further changes are needed. However have a look again at the `scroll_event_handler` funcitons: 
+If you look in the function body of `markdown_editor` you will not see any `Msg` type referenced directly,
+and therefore might think that no further changes are needed. However have a look again at the `scroll_event_handler` functions: 
 
 ```
 
@@ -1116,7 +1117,7 @@ fn scroll_event_handler(event: Ev,
 
 This return an `EventHandler<Msg>` and the `Msg` is concrete here!
 
-To fix we simply use a generic type parameter here as well. So replace the signature with the below:  
+To fix we simply use a generic type parameter here as well. So replace the `scroll_event_handler` signature with the below:  
 
 ```
 fn scroll_event_handler<Ms>(event: Ev,
@@ -1124,10 +1125,10 @@ fn scroll_event_handler<Ms>(event: Ev,
     preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Ms> where Ms: 'static + Default{
 ```
 
-Now the function will use the `Ms` type that is used by `markdown_editor<Ms,_>`. Rust is smart enough to
-realise that it has to use the same `Ms` type. 
+Now this function will use the a generic `Ms` type as well. Rust is smart enough to
+realise that it has to use the same `Ms` type due to the return type of `markdown_editor`. 
 
-Once the above changes are made then we can call our markdown_edtior as below and use it freely in any Seed app.
+Once the above changes are made then we can call our markdown editor as below and use it freely in any Seed app.
 
 ```
 #[topo::nested]
@@ -1136,7 +1137,7 @@ fn view(_model: &Model) -> impl View<Msg> {
 }
 ```
 
-The great thing is because the `Ms` type is defined by the arguement passed to `on_submit` (in this case `Msg::SubmitMarkdownHtml`) **we dont actually have to 
+The great thing is because the `Ms` type is defined by the argument passed to `on_submit` (in this case `Msg::SubmitMarkdownHtml`) **we dont actually have to 
 explicitly state the message type to be used**. Our api surface is clean and easy to use!.
 
 "#
