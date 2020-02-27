@@ -623,7 +623,7 @@ Due to component behaviour being freely composable complex components can be cre
 `#[topo::nested]` functions have a unique id which is based on the function's parent call hierarchy, callsite, and an indexed slot.
 This enables functions to be topologically aware and therefore considered as unique components with local state.
 
-The only setup required is to ensure the seed root view is annotated with `#[topo::nested]` this way it acts as a root for all components.
+The only setup required is to ensure the Seed root view is annotated with `#[topo::nested]` this way it acts as a root for all components.
 
 At present if event handlers helpers are to be used then the `Msg` type should also implement a `default()` no-op. This restriction will be lifted eventually:
 
@@ -702,7 +702,12 @@ fn my_button() -> Node<Msg> {
                 "State Functions",
                 "Seed hooks' **state functions** are functions that relate to the storing of local state for a component.
 The primary function used is `use_state` which stores an arbitary value and returns an accessor. The other functions are used
-in specific situations, of which `new_state` is covered here."
+in specific situations, of which `new_state` is covered here.
+
+Users of React will notice some similarity between Seed Hooks and React Hooks, please note that Seed Hooks do not have the same
+restrictions as React Hooks as regards calling of hook functions. For instance Seed Hook's can be freely called within conditionals 
+and loops.
+"
             ),
             function_desc(
                 "use_state",
@@ -874,7 +879,7 @@ fn if_example() -> Node<Msg> {
             "state_access",
             "StateAccess<T>",
             r#"Seed Hook's **State Functions** return a `StateAccess<T>` value. This is an accessor which
-provides amoungst other features getter and setter access to the stored value of type T.
+provides amongst other features getter and setter access to the stored value of type T.
 
 The `StateAccess<T>` accessor knows what component's state to update and therefore this accessor can be used 
 in `EventHandler` callbacks to update state.
@@ -910,7 +915,10 @@ The example demonstrates displaying a value stored by an accessor from an `Input
     
         div![
             input![attrs![At::Value => input_access.get()], 
-                input_access.input_ev(Ev::Input, |i,text| *i=text)
+                input_ev(Ev::Input , |text| {
+                    input_access.set(text);
+                    Msg::default()
+                })
             ],
             format!("Text inputted: {}", input_access.get())
         ]
@@ -1025,7 +1033,8 @@ value attribute is linked to some value. `bind()` provides a shortcut to link an
 You simplfy specify the attribute and state accessor to bind.  Currently limited to updating on `Input` events, 
 therefore currently only usable with `input![]` elements.
 
-The example on the right binds integers to an input and then calculates a value with them.
+The example on the right binds integers to an input and then calculates a value with them. Under this example is 
+the code for similar functionality but without using `bind()`.
 ",
 r#"#[topo::nested]
 fn numberbind() -> Node<Msg> {
@@ -1038,6 +1047,38 @@ fn numberbind() -> Node<Msg> {
         p![format!("{} + {} = {}", a.get(), b.get(), a.get() + b.get())]
     ]
 }
+
+
+// Without bind there is a lot more boilerplate: 
+
+#[topo::nested]
+fn number_without_bind() -> Node<Msg> {
+    let a = use_state(|| 0);
+    let b = use_state(|| 0);
+
+    div![
+        input![attrs![At::Type=>"number", At::Value => a.get()], 
+            input_ev(Ev::Input, |text| 
+                {
+                    if let Ok(a_i32) = text.parse::<i32>() {
+                        a.set(a_i32)
+                    }
+                }
+            )
+        ],
+        input![attrs![At::Type=>"number", At::Value => b.get()], 
+        input_ev(Ev::Input, |text| 
+            {
+                if let Ok(b_i32) = text.parse::<i32>() {
+                    b.set(a_i32)
+                }
+            }
+        )
+    ],
+        p![format!("{} + {} = {}", a.get(), b.get(), a.get() + b.get())]
+    ]
+}
+
 "#,modal_content, numberbind)
     ]  
     ]

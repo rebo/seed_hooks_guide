@@ -1,0 +1,54 @@
+Glossary
+
+**component state** the collection of *state variables* that are used by a component.
+
+**state variable** state that is stored by `use_state`.  i.e. the integer value in
+```
+let counter = use_state(||0);
+```
+
+**state accessor**  responsible for getting, setting, and updating a **state variable**
+within its linked **topological context**. i.e. the `name` in :
+
+```
+let name = use_state(||"bob".to_string());
+```
+
+**topologically aware function** a function that has been annotated with `[topo::nested]`
+this function will have its own `Id`. I.e. the below function topologically aware: 
+
+```
+#[topo::nested]
+pub fn view(model: &Model) -> impl View<Msg> {
+    div![]
+}
+```        
+
+**topological context** the execution context of a topologically aware function. Based on
+where in the source the function was called, any parent topologically aware functions, and 
+a `slot` which counts sibling functions. Represented by a `topo::Id` value. i.e. the two `child` function calls
+have a different topological context.
+
+```
+#[topo::nested]
+pub fn parent(model: &Model) -> impl View<Msg> {
+    div![
+        child(),
+        child()
+    ]
+}
+
+#[topo::nested]
+pub fn child(model: &Model) -> impl View<Msg> {
+    span!["hi]
+}
+```
+
+**parent** a topologically aware function that in turns calls other topologically aware functions.
+
+
+
+
+
+
+
