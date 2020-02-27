@@ -106,7 +106,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step1"],
-                "Step 1 - Design & Component Data Flow",
+                "Step 1 - Design & component data flow",
             ]],
             li![a![
                 class![
@@ -117,7 +117,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step2"],
-                "Step 2 - Markdown Processing",
+                "Step 2 - Markdown processing",
             ]],
             li![a![
                 class![
@@ -128,7 +128,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step3"],
-                "Step 3 - Prettifying the Output",
+                "Step 3 - Prettifying the output",
             ]],
             li![a![
                 class![
@@ -150,7 +150,7 @@ fn left_bar_content() -> Node<Msg> {
                     C.hover__border_gray_300
                 ],
                 attrs![At::Href=>"tutorial#step5"],
-                "Step 5 - Adding Message Submission",
+                "Step 5 - Adding message submission",
             ]],
             li![a![
                 class![
@@ -236,9 +236,9 @@ fn main_screen_content() -> Node<Msg> {
             r#"
 # Getting Started
 
-In this tutorial we will create a live markdown renderer component that can freely re-used as needed.
+In this tutorial we will use **Seed Hooks** to create a markdown editor component that can freely re-used in any Seed app.
 
-You can see the finished component example by clicking [here](/tutorial_example).
+You can see a demo of the finished component by clicking [here](/tutorial_example).
 
 To assist checking progress in this tutorial please see here for the [final code](https://github.com/rebo/markdown-editor).
 
@@ -266,8 +266,8 @@ To run this quickstart project you need cargo-make installed:
 ```
 cargo install cargo-make
 ```
-This will install cargo-make in your ~/.cargo/bin.
-Make sure to add ~/.cargo/bin directory to your PATH variable.
+This will install cargo-make in your `~/.cargo/bin`.
+Make sure to add `~/.cargo/bin` directory to your PATH variable.
 
 You will also need to ensure that Rust can target wasm by adding this component:
 
@@ -275,7 +275,7 @@ You will also need to ensure that Rust can target wasm by adding this component:
 rustup target add wasm32-unknown-unknown
 ```
 
-Check it compiles and serves correctly with 
+Check it compiles and serves correctly with:
 
 ```
 cargo make build; cargo make serve
@@ -284,7 +284,7 @@ cargo make build; cargo make serve
 You can access the site from `http://localhost:8000`. This will display a simple button counter.
 
 Currently **Seed Hooks** only work on nightly rust, this is due to requiring the feature `TrackCaller` therefore it is 
-important to install a recently nightly. The below has been built with the nightly of 24th February 2020. 
+important to install a recently nightly. The below has been built with the nightly of 26th February 2020. 
 
 To install nightly rust do this:
 
@@ -334,13 +334,13 @@ Next create a `styles.css` in the project root with these contents:
 The ".markdown-body" classes are needed later because Tailwind removes bullet points 
 which is needed for rendering `<li>` tags.
 
-Now build the tailwindCSS with 
+Now build the TailwindCSS with:
 
 ```
 npx tailwindcss build styles.css -o output.css
 ```
 
-and add this to the `index.html`
+and add this to the `index.html`:
 
 ```
 // In index.html...
@@ -376,8 +376,8 @@ use comp_state::*;
 use comp_state_seed_extras::*;
 ```
 
-The final bit of setup required is to add a root component to the seed view. This is acheived by annotating 
-the main seed view function with `#[topo::nested]`.   For now replace the contents of the root view with a simple `div!`.
+The final bit of setup required is to add a root component to the Seed view. This is achieved by annotating 
+the main Seed view function with `#[topo::nested]`. For now replace the contents of the root view with a simple `div![]`.
 
 ```
 #[topo::nested]
@@ -420,7 +420,7 @@ pub fn render() {
         ),
         section_desc(
             "step1",
-            "Step 1 - Design & Component Data Flow",
+            "Step 1 - Design & component data flow",
             r#"
 ### Design
 
@@ -465,9 +465,9 @@ fn markdown_editor() -> Node<Msg> {
     ]
 } 
 ```
-The reason we annotate with `#[topo::nested]` is so that markdown_editor can operate as its own component with local state. 
+The reason we annotate with `#[topo::nested]` is so that `markdown_editor` can operate as its own component with local state. 
 
-This component can be rendered by calling it in the root view... 
+This component can be rendered by calling it in the root view:
 
 ```
 #[topo::nested]
@@ -476,7 +476,7 @@ fn view(_model: &Model) -> impl View<Msg> {
 }
 ```
 
-Currently nothing in the page is functional, this is only for setting up the layout.
+Currently nothing in the page is functional, the above code only sets up the layout.
 
 ### Cargo Watch
 
@@ -493,19 +493,19 @@ and
 cargo make watch
 ```
 
-`cargo make serve` will ensure that your server is always running and `cargo make watch` will automatically re-compile the .wasm file. 
+`cargo make serve` will ensure that your server is always running and `cargo make watch` will automatically re-compile the `.wasm` file. 
 Therefore the only thing that you will need to do is refresh the browser after updating any of your rust files.
 
 
 
 ### Data Flow
 
-So what do we want our component to do? When someone types in the text area we want the contents to be processed
+So what do we want our component to do? When someone types in the textarea we want the contents to be processed
 by a markdown processor and the results viewable in the preview box on the right.
 
 Ideally we would like the preview box to be in sync with the textarea cursor.
 
-Datawise this means we need a **state variable** to store the current text area content, this then gets processed by a filter 
+Datawise, this means we need a **state variable** to store the current textarea content, this then gets processed by a filter 
 on `Input` event.  
 
 In order to create this **state variable** we will use the first (and most used) hook function `use_state()`. Add the following
@@ -558,7 +558,7 @@ fn update(msg: Msg, _model: &mut Model, _: &mut impl Orders<Msg>) {
 }
 ```
 
-Lastly lets ensure that the bind is working correctly and we will output the raw textarea input into the preview div:
+Lastly lets ensure that the bind is working correctly and we will output the raw `textarea![]` input into the preview div:
 
 ```
 // In in lib.rs...
@@ -571,14 +571,14 @@ fn markdown_editor() -> Node<Msg> {
     ]
     ...
 ```
-Refreshing your browser now (`https://localhost:8000`) and typing in the text area should output the text directly within the 
-markdown preview `div`.
+Refreshing your browser now (`https://localhost:8000`) and typing in the textarea should output the text directly within the 
+markdown preview div.
 
 "#
         ),
         section_desc(
             "step2",
-            "Step 2 - Markdown Processing",
+            "Step 2 - Markdown processing",
             r#"
 
 What we are going to do in this section is 
@@ -587,7 +587,7 @@ What we are going to do in this section is
 
 ### How to process
 
-We now have a basic bind set up, updating the text area will update the `source` state variable.
+We now have a basic bind set up, updating the textarea will update the `source` state variable.
 This is then directly output to the preview div.
 
 Instead of outputting directly to the preview div, we want it to be processed as markdown. 
@@ -685,9 +685,9 @@ div![
 
 This will ensure the preview pane's markdown is rendered correctly.
 
-### Improve the look of the text area
+### Improve the look of the textarea
 
-Furthermore we woud like the `textarea` input to be mono-space. Therefore adjust its class:
+Furthermore we woud like the textarea input to be mono-space. Therefore adjust its class:
 
 ```
 // In in lib.rs...
@@ -699,7 +699,7 @@ textarea![
 ],
 ```            
 
-Lets try how it all works now, save the file refresh the browser. Try typing the following into the text area: 
+Lets try how it all works now, save the file refresh the browser. Try typing the following into the textarea: 
 
 ```
 # Seed Rocks
@@ -714,7 +714,7 @@ Lets try how it all works now, save the file refresh the browser. Try typing the
             r#"
 ### Auto scrolling the preview
 
-When we edit the text area we ideally would like the preview to scroll to a similar position. 
+When we edit the textarea we ideally would like the preview to scroll to a similar position. 
 This would enable our edits to be easier to see. Therefore we want to programatically scroll the `markdown-body` div 
 on `KeyUp` and also on `Scroll` events.
 
@@ -738,7 +738,7 @@ and enable access to the following types at the top of `lib.rs`:
 use web_sys::{HtmlElement, HtmlTextAreaElement};
 ```
 
-after the `let source = use_state..` line add two more use_state hooks. 
+after the `let source = use_state..` line add two more `use_state` hooks. 
 
 ```
 // In in lib.rs...
@@ -773,7 +773,7 @@ div![
 In order to set the respective scroll on the preview we use a simple percentage of textarea
 scroll as a guide.
 
-This is achieved via the following event handler, add this to the button of the `textarea!`
+This is achieved via the following event handler, add this to the bottom of the `textarea![]`
 node:
 
 ```
@@ -795,12 +795,12 @@ textarea![
 There are some issues with this simple percentage based scroll above. For markup that 
 results in larger rendered markdown, such as headers, the scrolling will not perfectly match up.
 
-Furthermore we also need an identical EventHandler callback for an `Ev::Scroll` event.  You could cut and paste code above
-however we can prevent needless repretition by using a function.  
+Furthermore we also need an identical `EventHandler` callback for an `Ev::Scroll` event.  You could cut and paste code above
+however we can prevent needless repetition by using a function.  
 
-We fix both ehse issues by using the code below.
+We fix both these issues by using the code below.
 
-First remove the EventHandler above and add the following function to `lib.rs`.
+First, remove the `EventHandler` above and add the following function to `lib.rs`.
 
 ```
 //in lib.rs 
@@ -830,7 +830,7 @@ fn scroll_event_handler(
 }
 ```
 
-Finally the following two lines at the bottom of the `textarea!` will generate the correct event handlers:
+Finally, the following two lines at the bottom of the `textarea![]` will generate the correct event handlers:
 
 ```
 //in lib.rs  
@@ -880,13 +880,13 @@ Try pasting the following into the textarea and try scrolling or moving the curs
         ),
         section_desc(
             "step5",
-            "Step 5 - Message Submission",
+            "Step 5 - Adding Message submission",
             r#"
-The final step is to modify the function signature to allow an arbiatry message to be passed.
-This message will then be sent to seed on pressing of the submit button. 
+We now modify the function signature to allow an arbitrary message to be passed to Seed's update function.
+The message will be sent to Seed when the submit button is pressed.
 
 The message should permit a String argument which should be the content of the rendered markdown. 
-Hence we will use the following: 
+Hence we will use the following `markdown_editor()` function signature: 
 
 ```
 // In in lib.rs...
@@ -894,7 +894,7 @@ Hence we will use the following:
 fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> Node<Msg>
 ```
 
-We modify the `Msg` type to allow for one of these. 
+We modify the `Msg` type to add a variant that accepts a `String` argument.
 
 ```
 // In in lib.rs...
@@ -905,7 +905,7 @@ enum Msg {
 }
 ```
 
-Finally we add an `Ev::Click` event handler to the submit button.
+We add an `Ev::Click` event handler to the submit button, this sends the `Msg` to Seed.
 
 ```
 // In in lib.rs...
@@ -914,16 +914,13 @@ button![
     class!["bg-green-400 p-4 m-2"],
     "Submit (See console log)",
     mouse_ev(Ev::Click, move |_| {
-        if let Some(markdown_element) = preview_el.get().get(){
-            on_submit(markdown_element.inner_html())
-        } else {
-            on_submit(String::new())
-        }
+        let markdown_element = preview_el.get().get().expect("markdown-body doesn't exist");
+        on_submit(markdown_element.inner_html())
     })
 ]
 ```
 
-we handle this message in the `update()` function. Then finally tweak the calling function in the `view`:
+We handle the `Msg` in the Seed app's update function by printing it to the console. The last tweak is adjusting the calling function in the view:
 
 ```
 // In in lib.rs...
@@ -1016,11 +1013,8 @@ fn markdown_editor(on_submit: impl FnOnce(String) -> Msg + 'static + Clone) -> N
                 class!["bg-green-400 p-4 m-2"],
                 "Submit (See console log)",
                 mouse_ev(Ev::Click, move |_| {
-                    if let Some(markdown_element) = preview_el.get().get(){
-                        on_submit(markdown_element.inner_html())
-                    } else {
-                        on_submit(String::new())
-                    }
+                    let markdown_element = preview_el.get().get().expect("markdown-body doesn't exist");
+                    on_submit(markdown_element.inner_html())
                 })
             ]
         ]
@@ -1061,13 +1055,13 @@ pub fn render() {
         ),
         section_desc(
             "step6",
-            "Step 6 - Reusing the Markdown Editor",
+            "Step 6 - Reusing the markdown editor",
             r#"
 So far we have created a functional live markdown editor with local state
 which stores, processes, and renders the markdown source in a preview pane.
 
 This editor can be re-used freely in the current Seed app by simply calling the `markdown_editor` function
-freely multiple times.  For instance changing the view to the following creates 4 markdown editors
+freely multiple times.  For instance changing the view to the following creates four markdown editors
 all of which function independently.
 
 ```
@@ -1079,7 +1073,6 @@ fn view(_model: &Model) -> impl View<Msg> {
         markdown_editor(Msg::SubmitMarkdownHtml),
         markdown_editor(Msg::SubmitMarkdownHtml),
     ]
-
 }
 ```
 
@@ -1094,10 +1087,13 @@ In order to do this we will make the function generic over the message type.
 Change the `markdown-editor` function signature as follows:
 
 ```
-fn markdown_editor<Ms, F>(on_submit:F) -> Node<Ms> where
-    F: FnOnce(String) -> Ms + 'static + Clone ,
-    Ms: Default + 'static {
-    ...
+#[topo::nested]
+fn markdown_editor<Ms, F>(on_submit: F) -> Node<Ms>
+where
+    F: FnOnce(String) -> Ms + 'static + Clone,
+    Ms: Default + 'static,
+{
+        ...
 ```
 What we have done is create a generic function rather than a function that is specific for our app's `Msg` type.
 The `Ms` type is a type parameter that we supply to the function to tell it what message type it should use.
@@ -1110,10 +1106,11 @@ If you look in the function body of `markdown_editor` you will not see any `Msg`
 and therefore you might think that no further changes are needed. However have a look again at the `scroll_event_handler` function: 
 
 ```
-
-fn scroll_event_handler(event: Ev,
-    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
-    preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Msg>
+fn scroll_event_handler<Msg>(
+    event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+    preview_el: StateAccess<ElRef<HtmlElement>>,
+) -> EventHandler<Ms> {
 ```
 
 This return an `EventHandler<Msg>` and the `Msg` is concrete here!
@@ -1121,9 +1118,14 @@ This return an `EventHandler<Msg>` and the `Msg` is concrete here!
 To fix we simply use a generic type parameter here as well. So replace the `scroll_event_handler` signature with the below:  
 
 ```
-fn scroll_event_handler<Ms>(event: Ev,
-    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>, 
-    preview_el: StateAccess<ElRef<HtmlElement>>) -> EventHandler<Ms> where Ms: 'static + Default{
+fn scroll_event_handler<Ms>(
+    event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+    preview_el: StateAccess<ElRef<HtmlElement>>,
+) -> EventHandler<Ms>
+where
+    Ms: Default + 'static,
+{
 ```
 
 Now this function will use the a generic `Ms` type as well. Rust is smart enough to
@@ -1138,12 +1140,12 @@ fn view(_model: &Model) -> impl View<Msg> {
 }
 ```
 
-The great thing is because the `Ms` type is defined by the argument passed to `on_submit` (in this case `Msg::SubmitMarkdownHtml`) **we dont actually have to 
+The great thing is because the `Ms` type is defined by the argument passed to `on_submit` (in this case `Msg::SubmitMarkdownHtml`) **we don't actually have to 
 explicitly state the message type to be used**. Our api surface is clean and easy to use.
 
 ### Taking the widget further.  
 
-As it stands the widget is composable, versitile and fulfills the brief.   It can be
+As it stands the widget is composable, versatile and fulfills the brief.   It can be
 freely used in any Seed project (as long as hooks have been enabled) and can be rendered to the 
 view with a simple function call. 
 
@@ -1154,17 +1156,37 @@ That said, it could be extended in a number of ways.  Here are some ideas:
 * Buttons and shortcuts to quickly add things like bolding text. I.e. a short cut that bolds
 the highlighted word on `CTRL/CMD-B`.
 * A "Reset" button that clears the edit pane.
+* A version with a 'preview' and 'edit' tab instead of side by side panes.  
 * A Seed Hooks version - instead of taking a `Msg` argument it takes a Seed Hooks state accessor. 
 The widget then updates the accessor's state variable on submit.
-* A version with a 'preview' and 'edit' tab instead of side by side panes.  
-* Markdown source syntax highlighting to make the source more readable.
+
+For the last suggestion, the only things you would need to adjust are the function signature for the `markdown_editor` 
+and the submit button callback:
+
+```
+// in alt_md.rs
+
+pub fn markdown_editor_state<Ms, F>(md_state: StateAccess<String>) -> Node<Ms>
+where
+    F: FnOnce(String) -> Ms + 'static + Clone,
+    Ms: Default + 'static,
+{
+    ...
+    button![
+        class!["bg-green-400 p-4 m-2"],
+        "Submit (See console log)",
+        mouse_ev(Ev::Click, move |_| {
+            let markdown_element = preview_el.get().get().expect("markdown-body doesn't exist");
+            md_state.set(markdown_element.inner_html()); // changed line
+            Ms::default() // return default noop message.
+        })
+    ]
+    ...
+}
+```
+an [example](https://github.com/rebo/markdown-editor/blob/master/src/alt_md.rs) of this is in the [demo repository](https://github.com/rebo/markdown-editor) here.
 
 "#
         ),
     ]
 }
-
-//class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray_200 bg-indigo-100 border shadow-lg"],
-
-// 1. Learn how to use `ElRef`s to programatically access the dom.
-// 1. Add auto scrolling so the preview matches the textarea scroll location

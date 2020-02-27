@@ -621,7 +621,7 @@ Due to component behaviour being freely composable complex components can be cre
 `#[topo::nested]` functions have a unique id which is based on the function's parent call hierarchy, callsite, and an indexed slot.
 This enables functions to be topologically aware and therefore considered as unique components with local state.
 
-The only setup required is to ensure the seed root view is annotated with `#[topo::nested]` this way it acts as a root for all components.
+The only setup required is to ensure the Seed root view is annotated with `#[topo::nested]` this way it acts as a root for all components.
 
 At present if event handlers helpers are to be used then the `Msg` type should also implement a `default()` no-op. This restriction will be lifted eventually:
 
