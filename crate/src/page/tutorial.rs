@@ -12,10 +12,10 @@ use wasm_bindgen::JsCast;
 use seed::{prelude::*, *};
 pub fn view() -> Node<Msg> {
     div![
-        class!["container" C.h_screen],
-        div![
+        id!("page"),
+        header![
+            style!{St::GridArea => "header"},
             class![
-                "header",
                 C.shadow_xl,
                 C.bg_gray_600,
                 C.text_gray_200,
@@ -27,56 +27,55 @@ pub fn view() -> Node<Msg> {
             a![
                 class![
                     C.h_full,
-                    C.border_r_2,
                     C.py_2,
                     C.px_2,
                     C.mx_4,
                     C.hover__text_white,
-                    C.border_gray_100,
-                    C.hover__border_white
+                    C.text_gray_500,
+                    C.pointer_events_none
                 ],
+                attrs!(At::Href => ""),
                 "SEED HOOKS"
             ],
+            div![class![C.h_6, C.border_r_2]],
             a![
                 class![
                     C.h_full,
-                    C.border_r_2,
                     C.py_2,
                     C.px_2,
                     C.mx_4,
                     C.hover__text_white,
-                    C.border_gray_100,
-                    C.hover__border_white
                 ],
                 attrs!(At::Href => Page::Tutorial.to_href()),
                 "TUTORIAL"
             ],
+            div![class![C.h_6, C.border_r_2]],
             a![
                 class![
                     C.h_full,
-                    C.border_r_2,
                     C.py_2,
                     C.px_2,
                     C.mx_4,
                     C.hover__text_white,
-                    C.border_gray_100,
-                    C.hover__border_white
                 ],
                 attrs!(At::Href => Page::ApiRef.to_href()),
                 "API REFERENCE"
             ],
         ],
-        div![
+        nav![
+            style!{St::GridArea => "nav"},
             class![
-                "left",
-                // C.w_1of4,
                 C.bg_gray_700,
                 C.text_gray_400,
                 C.overflow_y_auto
             ],
             left_bar_content(),
         ],
-        div![class!["main", C.overflow_y_auto], main_screen_content()],
+        main![
+            style!{St::GridArea => "main"},
+            class![C.overflow_y_auto],
+                main_screen_content()
+            ],
     ]
 }
 
