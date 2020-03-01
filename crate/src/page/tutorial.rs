@@ -1,12 +1,12 @@
 use crate::{generated::css_classes::C, Msg, Page};
 use comp_state::{
-    do_once, topo, use_state, use_state_unique, ChangedState, CloneState, StateAccess,
+    do_once, topo, use_state, ChangedState, CloneState, StateAccessDropType,StateAccess,
 };
 use comp_state_seed_extras::{
     after_render, after_render_once, bind, get_html_element_by_id, StateAccessEventHandlers,
     UpdateElLocal,
 };
-use comrak::{markdown_to_html, ComrakOptions};
+use comrak::{markdown_to_html, ComrakOptions}; 
 use wasm_bindgen::JsCast;
 
 use seed::{prelude::*, *};
@@ -182,7 +182,6 @@ extern "C" {
 
 #[topo::nested]
 fn section_desc<T: Into<String>>(href_name: T, title: T, description: T) -> Vec<Node<Msg>> {
-    let drop_type = use_state(crate::DropType::default);
 
     let mut opts = ComrakOptions::default();
     opts.github_pre_lang = true;
@@ -191,9 +190,9 @@ fn section_desc<T: Into<String>>(href_name: T, title: T, description: T) -> Vec<
     let description = markdown_to_html(&description.into(), &opts);
 
     let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
-    do_once(|| drop_type.update(|dt| dt.dropped = true));
 
-    if drop_type.get().dropped {
+
+    do_once(|| 
         after_render(move |_| {
             if let Some(desc_el) = desc_el.get().get() {
                 let code_children = desc_el.get_elements_by_tag_name("h3");
@@ -209,10 +208,10 @@ fn section_desc<T: Into<String>>(href_name: T, title: T, description: T) -> Vec<
                     let code_el = code_children.item(idx).unwrap();
                     code_el.set_class_name("language-rust");
                     highlightElement(code_el.dyn_into::<web_sys::HtmlElement>().unwrap());
-                }
-            }
-        });
-    }
+                } 
+            }   
+        })
+    ).reset_on_drop();
 
     nodes![
         h2![

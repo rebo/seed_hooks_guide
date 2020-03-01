@@ -9,7 +9,11 @@
 mod generated;
 mod page;
 
-use comp_state::{clone_state_with_topo_id, topo, StateAccess};
+use comp_state::{
+    clone_state_with_topo_id, execute_and_remove_drop_types, topo, StateAccess,
+    StateAccessDropType,
+};
+use comp_state_seed_extras::handle_drop_types;
 use fixed_vec_deque::FixedVecDeque;
 use generated::css_classes::C;
 use seed::{prelude::*, *};
@@ -163,38 +167,34 @@ pub fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::RouteChanged(url) => {
             model.page = url.into();
             orders.send_msg(Msg::UpdatePageTitle);
-        }
+        },
         Msg::UpdatePageTitle => {
             let title = match model.page {
                 Page::Home => TITLE_SUFFIX.to_owned(),
                 Page::ApiRef => format!("Api Reference - {}", TITLE_SUFFIX),
                 Page::About => format!("About - {}", TITLE_SUFFIX),
                 Page::Tutorial => format!("Tutorial - {}", TITLE_SUFFIX),
-                Page::TutorialExample => format!("MarkdownEditor - {}", TITLE_SUFFIX),
+                Page::TutorialExample => {
+                    format!("MarkdownEditor - {}", TITLE_SUFFIX)
+                },
                 Page::NotFound => format!("404 - {}", TITLE_SUFFIX),
             };
             document().set_title(&title);
-        }
-        Msg::ScrollToTop => {
-            window().scroll_to_with_scroll_to_options(web_sys::ScrollToOptions::new().top(0.))
-        }
+        },
+        Msg::ScrollToTop => window().scroll_to_with_scroll_to_options(
+            web_sys::ScrollToOptions::new().top(0.),
+        ),
         Msg::Scrolled(position) => {
             *model.scroll_history.push_back() = position;
-        }
+        },
         Msg::SubmitMarkdownHtml(html) => log!(html),
-        Msg::NoOp => {}
+        Msg::NoOp => {},
     }
 }
 
 // ------ ------
 //     View
 // ------ ------
-#[derive(Clone, Default)]
-pub struct DropType {
-    dropped: bool,
-}
-
-impl DropType {}
 
 // Notes:
 // - \u{00A0} is the non-breaking space
@@ -205,7 +205,7 @@ impl DropType {}
 
 #[topo::nested]
 pub fn view(model: &Model) -> impl View<Msg> {
-    let view = div![
+    div![
         class![C.fade_in, C.min_h_screen, C.flex, C.flex_col,],
         match model.page {
             Page::Home => page::home::view().els(),
@@ -217,16 +217,8 @@ pub fn view(model: &Model) -> impl View<Msg> {
         },
         page::partial::header::view(model).els(),
         page::partial::footer::view().els(),
-    ];
-    let unseen_ids = comp_state::unseen_ids();
-    for id in unseen_ids.iter() {
-        if let Some(drop_type) = clone_state_with_topo_id::<DropType>(*id) {
-            let access = StateAccess::<DropType>::new(*id);
-            access.update(|dt| dt.dropped = true);
-        }
-    }
-    comp_state::reset_unseen_id_list();
-    view
+        handle_drop_types()
+    ]
 }
 
 pub fn image_src(image: &str) -> String {
