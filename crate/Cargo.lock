@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "comp_state"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "anymap 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "enclose 1.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -113,7 +113,7 @@ dependencies = [
 name = "comp_state_seed_extras"
 version = "0.0.9"
 dependencies = [
- "comp_state 0.2.2",
+ "comp_state 0.2.3",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "seed 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -566,7 +566,7 @@ dependencies = [
 name = "rebo"
 version = "0.1.0"
 dependencies = [
- "comp_state 0.2.2",
+ "comp_state 0.2.3",
  "comp_state_seed_extras 0.0.9",
  "comrak 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "fixed-vec-deque 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",

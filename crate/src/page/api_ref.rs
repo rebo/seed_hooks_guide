@@ -63,6 +63,11 @@ fn left_bar_content() -> Node<Msg> {
                 attrs![At::Href=>"api_ref#new_state"],
                 "new_state"
             ]],
+            li![a![
+                class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
+                attrs![At::Href=>"api_ref#use_drop_type"],
+                "use_drop_type"
+            ]],
         ],
         ul![
             a![
@@ -125,7 +130,11 @@ fn left_bar_content() -> Node<Msg> {
                 attrs![At::Href=>"api_ref#bind"],
                 "bind"
             ]],
+        ], 
+        ul![
+            a![attrs![At::Href=>"api_ref#glossary"], "Glossary"],
         ],
+
         // ul![
         //     "Utility Functions",
         //     li![a![
@@ -333,15 +342,15 @@ fn drop_type_example() -> Node<Msg> {
     let count = use_state(|| 0);
 
     let resettable_count = use_state(|| 0);
-    let drop_type = use_drop_type(move ||resettable_count.delete()).activate(); 
+    let drop_type = use_drop_type(move ||resettable_count.delete());
 
     let shortcut_count = use_state(|| 0).reset_on_drop();
  
     div!["Count:",
-        div!["normal count", f!(count)],
-        div!["resettable count", f!(resettable_count)],
-        div!["resettable count 2", f!(shortcut_count)],
-        button!["Increase Count",  class![
+        div!["normal count - ", f!(count)],
+        div!["resettable count - ", f!(resettable_count)],
+        div!["shortcut count - ", f!(shortcut_count)],
+        button!["Increase Counts",  class![
             C.mx_2
             C.bg_gray_500,
             C.hover__bg_gray_400,
@@ -625,9 +634,9 @@ fn main_screen_content() -> Node<Msg> {
         modal(modal_content),
         section![section_desc(
             "start_here",
-            "Start Here",
-            r#"**Seed Hooks** is the name of the technology that that enables local component state in Seed. It uses a **hook** function, often
-`use_state()` to store state that is associated with the component it is part of.   For instance: 
+            "Introduction",
+            r#"**Seed hooks** is the name of the technology that that enables local component state in Seed. It uses a hook function, often
+`use_state()`, to store state associated with a component. This is an example of code that uses Seed hooks.
 
 ```rust
 #[topo::nested]
@@ -640,28 +649,43 @@ fn name_input() -> Node<Msg> {
     ]
 }
 ```
-In the above code `name` is a **state accessor** for a local **state variable** which is then bound to the `input!` field's value.
+In the above code `name` is a **state accessor** for a local **state variable** which is then bound to the `input!` field's value attribute.
 
-### Why are **Seed Hooks** needed?
+### Why are **Seed hooks** needed?
 
 Seed hooks allow for the creation of re-usable components that can be freely integrated into any Seed app. Traditionally in Seed, and other Elm architecture
  style frameworks, this has required a fair amount of boilerplate and glue code. 
 
 Seed hooks allow 'components' to have their own state and those components can then be freely composed and re-used at will. Due to this they are ideal
-for functionality that does not need to touch the main Seed `View->Message->Update->View` loop. For instance a dropdown menu toggle, input element
+for functionality that does not need to touch the main Seed `View->Message->Update->View` loop. For instance, a dropdown menu toggle, input element
 state, or modal dialog visibility.
 
 Complex components can be created and re-used, such as date pickers, which do not need to be hard wired into the main app.
 
-### Setup
+### Setting up a Seed app to use Seed hooks
 
-`use_state` is the principal function to access local state. Individual components are identified by annotation with `#[topo::nested]`.
+Currently **Seed hooks** only work on nightly rust, this is due to requiring the feature `TrackCaller` therefore it is 
+important to install a recently nightly. The below has been built with the nightly of 26th February 2020. You need to ensure this feature
+is enabled at the top of `lib.rs`
+
+```
+// in lib.rs
+
+#![feature(track_caller)]
+```
+
+When using Seed hooks, components are structured as a tree. This means that components have a parent and potentially a number of children. Therefore 
+you need to ensure you have setup a root component. You can do this by annotating the root Seed view with `#[topo::nested]`
+
+```
+#[topo::nested]
+fn view(_model: &Model) -> impl View<Msg> {
+    div![]
+}
+```
 
 `#[topo::nested]` functions have a unique id which is based on the function's **execution context**, source file call-site and an indexed **slot**.
 This enables functions to be **topologically aware** and therefore considered as unique components with local state.
-
-The only setup required is to ensure the Seed root view is annotated with `#[topo::nested]` this ensures that **topologically aware functions** called
-from the root view have an identifiable root.
 
 At present if event handlers helpers are to be used then the `Msg` type should also implement a `default()` no-op. This restriction will be lifted eventually:
 
@@ -681,7 +705,6 @@ This api guide summarises the hooks and functions currently available in two cra
 
 a. [comp_state](https://github.com/rebo/comp_state)  
 b. [comp_state_seed_extras](https://github.com/rebo/comp_state_seed_extras)  
-
 
 Only the main functions are described here there are many more available for use in specific circumstances, please refer 
 to the `doc.rs` documentation for a full list.
@@ -759,7 +782,7 @@ and loops.
 The function takes a lazily evaluated closure which returns a value that gets stored on first execution. The stored value is
 linked to the component by a `topo::Id` which is also stored in the `StateAccess` accessor.
 
-The only limit on the type of value stored is a `'static` lifetime, however if use of the `get()` method is required then
+The only limit on the type of value stored is a `'static` lifetime, however if use of the `get()` method, whilst clones the stored state, is required then
 the type should be `Clone`.
 
 The code snippet demonstrates the use of `use_state` to store a count which gets updated on a button click.
@@ -829,6 +852,62 @@ fn todos() -> Node<Msg> {
     ]
 }"#, modal_content ,new_state_example
             ),
+            function_desc(
+                "use_drop_type",
+                "`use_drop_type() and handle_drop_types()`",
+                Some("fn use_drop_type<F: Fn() -> () + 'static>(drop_fn: F) -> StateAccess<DropType>"),
+r#"
+These functions are used to execute a closure when a component has stopped being rendered. Typically this is used to
+allow `do_once` blocks to be re-run, or to reset components when they are no longer being rendered.
+
+`use_drop_type()` accepts a closure as the only argument, this is then stored as a *state variable* in a `DropType`. 
+
+Seed Hooks know when this *state variable* is no longer accessed and can therefore then execute the closure.
+
+`StateAccessors` have a helper method `reset_on_drop()` defined on them which will delete the state when the state is no longer rendered.
+
+Creating the `DropType` is insufficient for the closure to be fired.  This is where `handle_drop_types()` comes in.
+The function is added as the last item in the main view macro. It will then cause the closure to be activated just prior to the end of 
+the view function. This function returns an `empty![]` therefore will not affect the view.
+
+The example is 3 simple counters, one counter retains state when the modal dialog is closed the other two do not.
+    
+"#,
+r#"
+#[topo::nested]
+fn drop_type_example() -> Node<Msg> {
+    let count = use_state(|| 0);
+
+    let resettable_count = use_state(|| 0);
+    let drop_type = use_drop_type(move ||resettable_count.delete());
+
+    let shortcut_count = use_state(|| 0).reset_on_drop();
+    
+    div!["Count:",
+        div!["normal count", f!(count)],
+        div!["resettable count", f!(resettable_count)],
+        div!["resettable count 2", f!(shortcut_count)],
+        button!["Increase Count", 
+            count.mouse_ev(Ev::Click, |count, _| *count += 1), 
+            resettable_count.mouse_ev(Ev::Click, |count, _| *count += 1), 
+            shortcut_count.mouse_ev(Ev::Click, |count, _| *count += 1)
+        ],
+    ]
+}
+
+// in the root view:
+#[topo::nested]
+pub fn view(model: &Model) -> impl View<Msg> {
+    div![
+        ...,
+        handle_drop_types()
+    ]
+}
+"#
+        ,
+        modal_content, drop_type_example
+            ),
+        
         ],
         section![
             section_desc(
@@ -841,17 +920,16 @@ The primary hooks in this regard are `do_once` and `after_render`.
     function_desc(
         "do_once",
         "`do_once`",
-        Some("fn do_once<F: Fn() -> ()>(func: F) -> StateAccess<DropType>"),
+        Some("fn do_once<F: Fn() -> ()>(func: F) -> StateAccess<bool>"),
         "`do_once()` executes the closure supplied once and only once. The execution runs synchronously that is immediately prior to any further statement. 
 Often this is combined with `after_render()` which schedules an closure to be executed after the next page render.  You typically use `do_once()` 
 when triggering an external javascript library that needs to complete an action a single time prior to a component being mounted.
 
-The issue with this is that this closure will execute once, and once only, for the life of the program. This causes a problem if you ever 
-want the closure to be executed a second time. We can allow the `do_once()` to be re-run after the component stops being rendered by calling 
-`reset_on_drop()` on the return type. Please see the section on **Drop Types*8 for further information.
+The `do_once` function returns a *state accessor* to the *state variable* that controls whether `do_once` can run. This means we can allow the 
+`do_once` to run again by calling `reset_on_drop()` on the return value. See `use_drop_type` for more information on this.
 
 The example on the right outputs a welcome message once and once only.
-        ",
+",
 r#"#[topo::nested]
 fn welcome_user_once(name: String) -> Node<Msg> {
 
@@ -866,7 +944,6 @@ fn welcome_user_once(name: String) -> Node<Msg> {
         message.set(
             div![
                 span!["Welcome ", name], 
-                button!["Clear Message", mouse_ev(Ev::Click, |_| Msg::default())]
             ]
         )
     );
@@ -881,8 +958,9 @@ fn welcome_user_once(name: String) -> Node<Msg> {
         Some("fn after_render<F: Fn(f64) -> () + 'static>(func: F)"),
         "`after_render()` executes the closure supplied after the next render. The execution runs asynchronously 
 that is after the DOM tree has been created, diffed, and after the view has been painted to the window.
-Often this is combined with `do_once()` which schedules an closure to be executed only once after the next page render.  You typically use `after_render()` 
-when triggering a dom interaction, for instance an animation or popup that is not part of the virtual dom tree.
+Often this is combined with `do_once()` which schedules an closure to be executed only once after the next page render.  
+
+You typically use `after_render()` when triggering a dom interaction, for instance an animation or popup that is not part of the virtual dom tree.
 
 The example on the right renders two input boxes and after an input event schedules a calculation to update the dom manually",
 r#"
@@ -918,51 +996,6 @@ fn if_example() -> Node<Msg> {
 }
 "#,modal_content, if_example
     ),
-
-    function_desc(
-        "use_drop_type",
-        "`use_drop_type() and handle_drop_types()`",
-        Some("fn use_drop_type<F: Fn() -> () + 'static>(drop_fn: F) -> StateAccess<DropType>"),
-r#"
-Both these functions are used to execute a closure when a component has stopped being rendered. Typically this is used to
-allow `do-once` blocks to be re-run.  
-
-`use_drop_type() accepts a closure as the only argument, this is then stored as a *state variable* in a `DropType`. Seed Hooks 
-know when this *state variable* is no longer accessed and can therefore then execute the closure on the drop type.
-
-the `DropType` stored by `use_drop_type` starts off un-activated.  In order for the closure to be run it has to be activated. This can 
-be achieved by calling either `reset_on_drop()` or `activate()` on the *state accessor* for the `DropType`.
-
-Creating and activating the `DropType` is insufficient for the closure to be fired.  This is where `handle_drop_types()` comes in.
-The function is added as the last item in the main view macro. It will then cause the closure to be activated just prior to the end of 
-the view function. This function returns an `empty![]` therefore will not affect the view.
-
-The example is a simple counter, however when the modal dialog is closed the counter will be reset.
-
-"#,
-r#"#[topo::nested]
-fn drop_type_example(name: String) -> Node<Msg> {
-    let count = use_state(|| 3);
-    let drop_type = use_drop_type(||count.delete()).activate();
-
-    div![
-        button![
-            "-",
-            count.mouse_ev(Ev::Click, move |v,_| *v -= 1),
-        ],
-        count,
-        button![
-            "-",
-            count.mouse_ev(Ev::Click, move |v,_| *v -= 1),
-        ],
-    ]
-}
-"#
-,
-modal_content, drop_type_example
-    ),
-
-
         ],
         section![
         //     h2![a![attrs![At::Name=>"state_access"], "StateAccess Struct"]],
@@ -978,7 +1011,7 @@ in `EventHandler` callbacks to update state.
 Please note that unlike React Hooks StateAccess getter & setters do not reschedule a re-render of the 
 virtual DOM.
 
-The struct implements `Copy` and therefore can be freely shared, this is independent as to whether `T` imlements `Copy`.
+The struct implements `Copy` and therefore can be freely shared, this is independent as to whether `T` implements `Copy`.
 
 The primary method used to retrieve stored data is `get()`, this only works with `Clone` types. For non-`Clone` types
 the `get_with()` method is available.
@@ -992,10 +1025,10 @@ collection of state accessors to manage complex tree structures.
             "`get`",
             Some("fn get(&self) -> T // T must be Clone + 'static"),
             "This method returns a clone of the stored data, therefore in order for it to be used `T` must of course implement `Clone`.
-Although all accesses will therefore cause an allocation due to the clone, this is the most ergonomical way in which to access the stored data.
+Although all accesses will therefore cause an allocation due to the clone, this is the most direct way in which to access the stored data.
 Care should be taken in understanding that the clone may be stale if this value is used in a callback.
 
-For this reason using `update()` in a callback is usually prefereable to using `set()`.
+For this reason using `update()` in a callback is usually preferable to using `set()`.
 
 The example demonstrates displaying a value stored by an accessor from an `Input` event.",
     r#"
@@ -1135,7 +1168,7 @@ fn numberbind() -> Node<Msg> {
     div![
         input![attrs![At::Type=>"number"], bind(At::Value, a)],
         input![attrs![At::Type=>"number"], bind(At::Value, b)],
-        p![format!("{} + {} = {}", a.get(), b.get(), a.get() + b.get())]
+        p![format!("{} + {} = {}", a, b, a + b)]
     ]
 }
 
