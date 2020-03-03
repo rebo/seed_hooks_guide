@@ -1,5 +1,5 @@
 use crate::{generated::css_classes::C, Msg};
-use seed_hooks::{topo, new_state, do_once, use_drop_type, use_state, CloneState, StateAccess, StateAccessDropType, ChangedState, after_render_once, StateAccessEventHandlers, UpdateElLocal,bind, after_render, get_html_element_by_id, };
+use seed_hooks::{topo, new_state, do_once, use_unmount, use_state, CloneState, StateAccess, StateAccessUnmount, ChangedState, after_render_once, StateAccessEventHandlers, UpdateElLocal,bind, after_render, get_html_element_by_id, };
 use comrak::{markdown_to_html, ComrakOptions};
 use wasm_bindgen::JsCast;
 use ifmt::iformat as f;
@@ -64,8 +64,8 @@ fn left_bar_content() -> Node<Msg> {
             ]],
             li![a![
                 class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
-                attrs![At::Href=>"api_ref#use_drop_type"],
-                "use_drop_type"
+                attrs![At::Href=>"api_ref#use_unmount"],
+                "use_unmount"
             ]],
         ],
         ul![
@@ -194,7 +194,7 @@ fn section_desc<T: Into<String>>(
                 );
             }
         }
-    })).reset_on_drop();
+    })).reset_on_unmount();
 
 
     nodes![
@@ -251,7 +251,7 @@ fn function_desc<T: Into<String>>(
             highlightElement(code_el);
         }
     });
-}).reset_on_drop();
+}).reset_on_unmount();
 
     div![
         h3![
@@ -337,13 +337,13 @@ fn numberbind() -> Node<Msg> {
 } 
 
 #[topo::nested]
-fn drop_type_example() -> Node<Msg> {
+fn unmount_example() -> Node<Msg> {
     let count = use_state(|| 0);
 
     let resettable_count = use_state(|| 0);
-    let drop_type = use_drop_type(move ||resettable_count.delete());
+    let unmount = use_unmount(move ||resettable_count.delete());
 
-    let shortcut_count = use_state(|| 0).reset_on_drop();
+    let shortcut_count = use_state(|| 0).reset_on_unmount();
  
     div!["Count:",
         div!["normal count - ", f!(count)],
@@ -634,7 +634,7 @@ fn main_screen_content() -> Node<Msg> {
         section![section_desc(
             "start_here",
             "Introduction",
-            r#"The [**Seed hooks**](https://crates.io/crates/seed_hooks) crate enables local component state in Seed. A hook function, often
+            r#"[**Seed hooks**](https://crates.io/crates/seed_hooks) enable local component state in Seed. A hook function, often
 `use_state()` is used to store state associated with a component. This is an example of the code that uses Seed hooks.
 
 ```rust
@@ -856,20 +856,20 @@ fn todos() -> Node<Msg> {
 }"#, modal_content ,new_state_example
             ),
             function_desc(
-                "use_drop_type",
-                "`use_drop_type() and handle_drop_types()`",
-                Some("fn use_drop_type<F: Fn() -> () + 'static>(drop_fn: F) -> StateAccess<DropType>"),
+                "use_unmount",
+                "`use_unmount() and handle_unmount()`",
+                Some("fn use_unmount<F: Fn() -> () + 'static>(unmount_fn: F) -> StateAccess<DropType>"),
 r#"
 These functions are used to execute a closure when a component has stopped being rendered. Typically this is used to
 allow `do_once` blocks to be re-run, or to reset components when they are no longer being rendered.
 
-`use_drop_type()` accepts a closure as the only argument, this is then stored as a *state variable* in a `DropType`. 
+`use_unmount()` accepts a closure as the only argument, this is then stored as a *state variable* in a `DropType`. 
 
 Seed Hooks know when this *state variable* is no longer accessed and can therefore then execute the closure.
 
-`StateAccessors` have a helper method `reset_on_drop()` defined on them which will delete the state when the state is no longer rendered.
+`StateAccessors` have a helper method `reset_on_unmount()` defined on them which will delete the state when the state is no longer rendered.
 
-Creating the `DropType` is insufficient for the closure to be fired.  This is where `handle_drop_types()` comes in.
+Creating the `Unmount` is insufficient for the closure to be fired.  This is where `handle_unmounts()` comes in.
 The function is added as the last item in the main view macro. It will then cause the closure to be activated just prior to the end of 
 the view function. This function returns an `empty![]` therefore will not affect the view.
 
@@ -881,13 +881,13 @@ The example is 3 simple counters, one counter retains state when the modal dialo
 "#,
 r#"
 #[topo::nested]
-fn drop_type_example() -> Node<Msg> {
+fn unmount_example() -> Node<Msg> {
     let count = use_state(|| 0);
 
     let resettable_count = use_state(|| 0);
-    let drop_type = use_drop_type(move ||resettable_count.delete());
+    let unmount = use_unmount(move ||resettable_count.delete());
 
-    let shortcut_count = use_state(|| 0).reset_on_drop();
+    let shortcut_count = use_state(|| 0).reset_on_unmount();
     
     div!["Counts (Try closing modal, then re-opening after increasing counters):",
         div!["normal count", f!(count)],
@@ -906,12 +906,12 @@ fn drop_type_example() -> Node<Msg> {
 pub fn view(model: &Model) -> impl View<Msg> {
     div![
         ...,
-        handle_drop_types()
+        handle_unmounts()
     ]
 }
 "#
         ,
-        modal_content, drop_type_example
+        modal_content, unmount_example
             ),
         
         ],
@@ -932,7 +932,7 @@ Often this is combined with `after_render()` which schedules an closure to be ex
 when triggering an external javascript library that needs to complete an action a single time prior to a component being mounted.
 
 The `do_once` function returns a *state accessor* to the *state variable* that controls whether `do_once` can run. This means we can allow the 
-`do_once` to run again by calling `reset_on_drop()` on the return value. See `use_drop_type` for more information on this.
+`do_once` to run again by calling `reset_on_unmount()` on the return value. See `use_unmount` for more information on this.
 
 The example on the right outputs a welcome message once and once only.
 ",

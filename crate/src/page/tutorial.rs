@@ -1,7 +1,7 @@
 use crate::{generated::css_classes::C, Msg, Page};
 
 use seed_hooks::{
-    do_once, topo, use_state, ChangedState, CloneState, StateAccessDropType,StateAccess,
+    do_once, topo, use_state, ChangedState, CloneState, StateAccessUnmount,StateAccess,
     after_render, after_render_once, bind, get_html_element_by_id, StateAccessEventHandlers,
     UpdateElLocal,
 };
@@ -209,7 +209,7 @@ fn section_desc<T: Into<String>>(href_name: T, title: T, description: T) -> Vec<
                 } 
             }   
         })
-    ).reset_on_drop();
+    ).reset_on_unmount();
 
     nodes![
         h2![

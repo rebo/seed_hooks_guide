@@ -13,8 +13,8 @@ use fixed_vec_deque::FixedVecDeque;
 use generated::css_classes::C;
 use seed::{prelude::*, *};
 use seed_hooks::{
-    clone_state_with_topo_id, execute_and_remove_drop_types, handle_drop_types,
-    topo, StateAccess, StateAccessDropType,
+    clone_state_with_topo_id, execute_and_remove_unmounts, handle_unmount,
+    topo, StateAccess, StateAccessUnmount,
 };
 use wasm_bindgen::JsCast;
 const TITLE_SUFFIX: &str = "seedhooks";
@@ -216,7 +216,7 @@ pub fn view(model: &Model) -> impl View<Msg> {
         },
         page::partial::header::view(model).els(),
         page::partial::footer::view().els(),
-        handle_drop_types()
+        handle_unmount()
     ]
 }
 
