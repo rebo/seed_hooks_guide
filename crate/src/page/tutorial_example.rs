@@ -1,6 +1,5 @@
 use crate::{generated::css_classes::C, Msg, Page};
-use comp_state::*;
-use comp_state_seed_extras::*;
+use seed_hooks::*;
 use comrak::{markdown_to_html, ComrakOptions};
 use seed::{prelude::*, *};
 

@@ -1,6 +1,5 @@
 use crate::{generated::css_classes::C, Msg};
-use comp_state::{topo, new_state, do_once, use_drop_type, use_state, CloneState, StateAccess, StateAccessDropType, ChangedState};
-use comp_state_seed_extras::{after_render_once, StateAccessEventHandlers, UpdateElLocal,bind, after_render, get_html_element_by_id, };
+use seed_hooks::{topo, new_state, do_once, use_drop_type, use_state, CloneState, StateAccess, StateAccessDropType, ChangedState, after_render_once, StateAccessEventHandlers, UpdateElLocal,bind, after_render, get_html_element_by_id, };
 use comrak::{markdown_to_html, ComrakOptions};
 use wasm_bindgen::JsCast;
 use ifmt::iformat as f;
@@ -607,7 +606,7 @@ fn my_input() -> Node<Msg> {
         class![C.border_gray_600, C.rounded_sm,C.border_2, C.shadow, C.p_2, C.m_3],
             input_access.input_ev(Ev::Input, |i,text| *i=text)
         ],
-        format!("Text inputted: {}", input_access.get())
+        format!("Text inputted: {}", input_access)
     ]
 }
 
@@ -635,8 +634,8 @@ fn main_screen_content() -> Node<Msg> {
         section![section_desc(
             "start_here",
             "Introduction",
-            r#"**Seed hooks** is the name of the technology that that enables local component state in Seed. It uses a hook function, often
-`use_state()`, to store state associated with a component. This is an example of code that uses Seed hooks.
+            r#"The [**Seed hooks**](https://crates.io/crates/seed_hooks) crate enables local component state in Seed. A hook function, often
+`use_state()` is used to store state associated with a component. This is an example of the code that uses Seed hooks.
 
 ```rust
 #[topo::nested]
@@ -645,19 +644,21 @@ fn name_input() -> Node<Msg> {
 
     div![
         input![bind(At::Value, name)],
-        format!("Hello {}", name.get())
+        format!("Hello {}", name)
     ]
 }
 ```
 In the above code `name` is a **state accessor** for a local **state variable** which is then bound to the `input!` field's value attribute.
 
+On this page all words in **bold** have a glossary definition at the bottom of this page.
+
 ### Why are **Seed hooks** needed?
 
-Seed hooks allow for the creation of re-usable components that can be freely integrated into any Seed app. Traditionally in Seed, and other Elm architecture
- style frameworks, this has required a fair amount of boilerplate and glue code. 
+Seed hooks allow for the creation of re-usable components that can be freely integrated into any Seed app at any location in the view hierarchy. 
+Traditionally in Seed, and other Elm architecture style frameworks, this has required a fair amount of boilerplate and glue code. 
 
 Seed hooks allow 'components' to have their own state and those components can then be freely composed and re-used at will. Due to this they are ideal
-for functionality that does not need to touch the main Seed `View->Message->Update->View` loop. For instance, a dropdown menu toggle, input element
+for functionality that does not need to touch the main Seed `View->Message->Update->View` loop. For instance, a drop-down menu toggle, an input element
 state, or modal dialog visibility.
 
 Complex components can be created and re-used, such as date pickers, which do not need to be hard wired into the main app.
@@ -665,19 +666,26 @@ Complex components can be created and re-used, such as date pickers, which do no
 ### Setting up a Seed app to use Seed hooks
 
 Currently **Seed hooks** only work on nightly rust, this is due to requiring the feature `TrackCaller` therefore it is 
-important to install a recently nightly. The below has been built with the nightly of 26th February 2020. You need to ensure this feature
+important to install a recently nightly. This site has been built with the nightly of 26th February 2020. You need to ensure this feature
 is enabled at the top of `lib.rs`
 
 ```
 // in lib.rs
 
 #![feature(track_caller)]
+
+use seed_hooks::*;
 ```
+
+
+
 
 When using Seed hooks, components are structured as a tree. This means that components have a parent and potentially a number of children. Therefore 
 you need to ensure you have setup a root component. You can do this by annotating the root Seed view with `#[topo::nested]`
 
 ```
+// in lib.rs
+
 #[topo::nested]
 fn view(_model: &Model) -> impl View<Msg> {
     div![]
@@ -687,7 +695,7 @@ fn view(_model: &Model) -> impl View<Msg> {
 `#[topo::nested]` functions have a unique id which is based on the function's **execution context**, source file call-site and an indexed **slot**.
 This enables functions to be **topologically aware** and therefore considered as unique components with local state.
 
-At present if event handlers helpers are to be used then the `Msg` type should also implement a `default()` no-op. This restriction will be lifted eventually:
+At present if event handlers helpers are to be used then the Seed `Msg` type should also implement a `default()` no-op. This restriction will be lifted eventually:
 
 ```rust
 enum Msg {
@@ -700,11 +708,7 @@ impl Default for Msg {
     }
 }
 ```
-This api guide summarises the hooks and functions currently available in two crates:  
-
-
-a. [comp_state](https://github.com/rebo/comp_state)  
-b. [comp_state_seed_extras](https://github.com/rebo/comp_state_seed_extras)  
+This api guide summarises the hooks and functions currently available in the crate[seed_hooks](https://github.com/rebo/seed_hooks).
 
 Only the main functions are described here there are many more available for use in specific circumstances, please refer 
 to the `doc.rs` documentation for a full list.
@@ -716,8 +720,7 @@ Here is a complete `lib.rs` file demonstrating the basic usage.
 ```
 #![feature(track_caller)]
 use seed::{prelude::*, *};
-use comp_state::*;
-use comp_state_seed_extras::*;
+use seed_hooks::*;
 
 #[derive(Default)]
 struct Model {}
@@ -870,6 +873,9 @@ Creating the `DropType` is insufficient for the closure to be fired.  This is wh
 The function is added as the last item in the main view macro. It will then cause the closure to be activated just prior to the end of 
 the view function. This function returns an `empty![]` therefore will not affect the view.
 
+Is is essential that if a state variable is deleted by a `DropType` callback or otherwise that it is not later accessed 
+because this will result in a panic.
+
 The example is 3 simple counters, one counter retains state when the modal dialog is closed the other two do not.
     
 "#,
@@ -883,7 +889,7 @@ fn drop_type_example() -> Node<Msg> {
 
     let shortcut_count = use_state(|| 0).reset_on_drop();
     
-    div!["Count:",
+    div!["Counts (Try closing modal, then re-opening after increasing counters):",
         div!["normal count", f!(count)],
         div!["resettable count", f!(resettable_count)],
         div!["resettable count 2", f!(shortcut_count)],
@@ -1210,8 +1216,7 @@ fn number_without_bind() -> Node<Msg> {
         section_desc(
             "glossary",
             "Glossary",
-            r#"# Glossary
-
+            r#"
 **Seed hook** - any of the Seed functions that facilitate storing and updating of *component state*.  For example, functions such as `use_state`, `new_state` and `bind`. The term *hook* refers to React Hooks which have similar functionality.
 
 **Component state** - the collection of *state variables* that are used and stored by a component.
@@ -1295,15 +1300,15 @@ then the *topology* of `layout()` is :
 
 ```
                 root(a)
-    _____________ ___________  
-    |             |           |
-    b()          b()         c()
-_____        ______         |
-|    |       |    |        d()
-c()  c()     c()  c()
-|    |       |    |
-d()  d()     d()  d()
-````
+     _______________________  
+    |            |          |
+    b()          b()        c()
+ _____         _____        |
+|     |       |     |       d()
+c()   c()     c()   c()
+|     |       |     |
+d()   d()     d()   d()
+```
 The reason this is important is that each node above will have its own `topo::Id` which means it can be uniquely identified. Therefore state can be associated locally with each node even though it is the same function.
 
 **Execution context** - Where in the above topology a function has been executed.

@@ -1,8 +1,7 @@
 use crate::{generated::css_classes::C, Msg, Page};
-use comp_state::{
+
+use seed_hooks::{
     do_once, topo, use_state, ChangedState, CloneState, StateAccessDropType,StateAccess,
-};
-use comp_state_seed_extras::{
     after_render, after_render_once, bind, get_html_element_by_id, StateAccessEventHandlers,
     UpdateElLocal,
 };
@@ -357,21 +356,19 @@ In order to enable **Seed Hooks** add the following to `Cargo.toml` in the `[dep
 ```
 // In Cargo.toml...
 
-comp_state = "0.2.1"
-comp_state_seed_extras = "0.0.8"
+seed_hooks = "0.1.0"
 ```
 
 Next, Seed hooks rely on the nightly `TrackCaller` feature you need to add the `#![feature(track_caller)]` feature flag to the top of `lib.rs`.
 
 Remove all existing `Model` and `Msg` fields/variants. You will also want to remove the match processing of `Msg` in your update function.
 
-You should also glob import both `comp_state` and `comp_state_seed_extras` with 
+You should also glob import the `seed_hooks` crate with:
 
 ```
 // In in lib.rs...
 
-use comp_state::*;
-use comp_state_seed_extras::*;
+use seed_hooks::*;
 ```
 
 The final bit of setup required is to add a root component to the Seed view. This is achieved by annotating 
@@ -393,8 +390,7 @@ The final base `lib.rs` should be as per below :
 // In in lib.rs...
 
 #![feature(track_caller)]
-use comp_state::*;
-use comp_state_seed_extras::*;
+use seed_hooks::*;
 use seed::{prelude::*, *};
 
 #[derive(Default)]
@@ -943,8 +939,7 @@ The final `lib.rs` file is below:
 
 ```
 #![feature(track_caller)]
-use comp_state::*;
-use comp_state_seed_extras::*;
+use seed_hooks::*;
 use seed::{prelude::*, *};
 use web_sys::{HtmlElement, HtmlTextAreaElement};
 

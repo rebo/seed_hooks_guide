@@ -9,14 +9,13 @@
 mod generated;
 mod page;
 
-use comp_state::{
-    clone_state_with_topo_id, execute_and_remove_drop_types, topo, StateAccess,
-    StateAccessDropType,
-};
-use comp_state_seed_extras::handle_drop_types;
 use fixed_vec_deque::FixedVecDeque;
 use generated::css_classes::C;
 use seed::{prelude::*, *};
+use seed_hooks::{
+    clone_state_with_topo_id, execute_and_remove_drop_types, handle_drop_types,
+    topo, StateAccess, StateAccessDropType,
+};
 use wasm_bindgen::JsCast;
 const TITLE_SUFFIX: &str = "seedhooks";
 // https://mailtolink.me/
