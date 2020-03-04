@@ -1,11 +1,7 @@
 use crate::{generated::css_classes::C, Msg, Page};
 
-use seed_hooks::{
-    do_once, topo, use_state, ChangedState, CloneState, StateAccessUnmount,StateAccess,
-    after_render, after_render_once, bind, get_html_element_by_id, StateAccessEventHandlers,
-    UpdateElLocal,
-};
-use comrak::{markdown_to_html, ComrakOptions}; 
+use seed_hooks::*;
+
 use wasm_bindgen::JsCast;
 
 use seed::{prelude::*, *};
@@ -181,11 +177,9 @@ extern "C" {
 #[topo::nested]
 fn section_desc<T: Into<String>>(href_name: T, title: T, description: T) -> Vec<Node<Msg>> {
 
-    let mut opts = ComrakOptions::default();
-    opts.github_pre_lang = true;
 
-    let title = markdown_to_html(&title.into(), &opts);
-    let description = markdown_to_html(&description.into(), &opts);
+    let title = md!(&title.into());
+    let description = md!(&description.into());
 
     let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
 
@@ -214,13 +208,13 @@ fn section_desc<T: Into<String>>(href_name: T, title: T, description: T) -> Vec<
     nodes![
         h2![
             class![C.m_3, C.text_2xl],
-            a![attrs![At::Name=>href_name.into()], raw!(&title)]
+            a![attrs![At::Name=>href_name.into()], title]
         ],
         hr![class![C.my_8 C.border_b_2 C.border_gray_200]],
         div![
             el_ref(&desc_el.get()),
             class!["api-description" C.m_3 C.leading_relaxed],
-            raw!(&description)
+            description
         ],
     ]
 }

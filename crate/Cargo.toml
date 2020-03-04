@@ -19,8 +19,7 @@ wasm-bindgen-test = "^0.3.8"
 wasm-bindgen = "^0.2.58"
 seed = "0.6.0"
 fixed-vec-deque = "0.1.8"
-seed_hooks = "0.1.1"
-comrak = "0.7.0"
+seed_hooks = "0.1.2"
 ifmt = "0.3.0"
 
 [dependencies.web-sys]

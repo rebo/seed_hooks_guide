@@ -1,6 +1,5 @@
 use crate::{generated::css_classes::C, Msg};
-use seed_hooks::{topo, new_state, do_once, use_unmount, use_state, CloneState, StateAccess, StateAccessUnmount, ChangedState, after_render_once, StateAccessEventHandlers, UpdateElLocal,bind, after_render, get_html_element_by_id, };
-use comrak::{markdown_to_html, ComrakOptions};
+use seed_hooks::*;
 use wasm_bindgen::JsCast;
 use ifmt::iformat as f;
 use crate::Page;
@@ -64,8 +63,8 @@ fn left_bar_content() -> Node<Msg> {
             ]],
             li![a![
                 class![C.ml_2,C.hover__text_gray_100, C.border_b_2, C.border_transparent, C.hover__border_gray_300],
-                attrs![At::Href=>"api_ref#use_unmount"],
-                "use_unmount"
+                attrs![At::Href=>"api_ref#on_unmount"],
+                "on_unmount"
             ]],
         ],
         ul![
@@ -164,16 +163,16 @@ fn section_desc<T: Into<String>>(
     title: T,
     description: T,
 ) -> Vec<Node<Msg>> {
-    let mut opts = ComrakOptions::default();
-    opts.github_pre_lang = true;
+    
+    
 
-    let title = markdown_to_html(&title.into(), &opts);
-    let description = markdown_to_html(&description.into(), &opts);
+    let title = md!(&title.into());
+    let description = md!(&description.into());
 
     let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
 
 
-    let dt = do_once(||
+    do_once(||
         after_render(move |_| {
 
         if let Some(desc_el) = desc_el.get().get() {
@@ -200,13 +199,13 @@ fn section_desc<T: Into<String>>(
     nodes![
         h2![
             class![C.m_3, C.text_2xl],
-            a![attrs![At::Name=>href_name.into()], raw!(&title)]
+            a![attrs![At::Name=>href_name.into()],  title]
         ],
         hr![class![C.my_8 C.border_b_2 C.border_gray_200]],
         div![
             el_ref(&desc_el.get()),
             class!["api-description" C.m_3 C.leading_relaxed],
-            raw!(&description)
+            description
         ],
     ]
 }
@@ -222,9 +221,9 @@ fn function_desc<T: Into<String>>(
     code_example: fn() -> Node<Msg>,
 ) -> Node<Msg> {
     let href_name = href_name.into();
-    let title = markdown_to_html(&title.into(), &ComrakOptions::default());
+    let title = md!(&title.into());
     let description =
-        markdown_to_html(&description.into(), &ComrakOptions::default());
+        md!(&description.into());
     let code = code.into();
     let code_el = use_state(ElRef::<web_sys::HtmlElement>::default);
     let desc_el = use_state(ElRef::<web_sys::HtmlElement>::default);
@@ -256,7 +255,7 @@ fn function_desc<T: Into<String>>(
     div![
         h3![
             class![C.m_3, C.text_xl],
-            a![attrs![At::Name=> href_name], raw!(&title)]
+            a![attrs![At::Name=> href_name], title]
         ],
         if let Some(sig) = signature {
             pre![class![C.p_4], code![sig]]
@@ -268,7 +267,7 @@ fn function_desc<T: Into<String>>(
             div![
                 el_ref(&desc_el.get()),
                 class![C.p_3, C.w_1of2 C.flex_none],
-                raw!(&description)
+                description
             ],
             div![
                 class![C.p_3, C.w_1of2 C.flex_none],
@@ -341,7 +340,7 @@ fn unmount_example() -> Node<Msg> {
     let count = use_state(|| 0);
 
     let resettable_count = use_state(|| 0);
-    let unmount = use_unmount(move ||resettable_count.delete());
+    on_unmount(move ||resettable_count.delete());
 
     let shortcut_count = use_state(|| 0).reset_on_unmount();
  
@@ -856,14 +855,14 @@ fn todos() -> Node<Msg> {
 }"#, modal_content ,new_state_example
             ),
             function_desc(
-                "use_unmount",
-                "`use_unmount() and handle_unmount()`",
-                Some("fn use_unmount<F: Fn() -> () + 'static>(unmount_fn: F) -> StateAccess<DropType>"),
+                "on_unmount",
+                "`on_unmount() and handle_unmount()`",
+                Some("fn on_unmount<F: Fn() -> () + 'static>(unmount_fn: F) -> StateAccess<Unmount>"),
 r#"
 These functions are used to execute a closure when a component has stopped being rendered. Typically this is used to
 allow `do_once` blocks to be re-run, or to reset components when they are no longer being rendered.
 
-`use_unmount()` accepts a closure as the only argument, this is then stored as a *state variable* in a `DropType`. 
+`on_unmount()` accepts a closure as the only argument, this is then stored as a *state variable* in a `Unmount`. 
 
 Seed Hooks know when this *state variable* is no longer accessed and can therefore then execute the closure.
 
@@ -873,7 +872,7 @@ Creating the `Unmount` is insufficient for the closure to be fired.  This is whe
 The function is added as the last item in the main view macro. It will then cause the closure to be activated just prior to the end of 
 the view function. This function returns an `empty![]` therefore will not affect the view.
 
-Is is essential that if a state variable is deleted by a `DropType` callback or otherwise that it is not later accessed 
+Is is essential that if a state variable is deleted by a `Unmount` callback or otherwise that it is not later accessed 
 because this will result in a panic.
 
 The example is 3 simple counters, one counter retains state when the modal dialog is closed the other two do not.
@@ -885,7 +884,7 @@ fn unmount_example() -> Node<Msg> {
     let count = use_state(|| 0);
 
     let resettable_count = use_state(|| 0);
-    let unmount = use_unmount(move ||resettable_count.delete());
+    let unmount = on_unmount(move ||resettable_count.delete());
 
     let shortcut_count = use_state(|| 0).reset_on_unmount();
     
@@ -932,7 +931,7 @@ Often this is combined with `after_render()` which schedules an closure to be ex
 when triggering an external javascript library that needs to complete an action a single time prior to a component being mounted.
 
 The `do_once` function returns a *state accessor* to the *state variable* that controls whether `do_once` can run. This means we can allow the 
-`do_once` to run again by calling `reset_on_unmount()` on the return value. See `use_unmount` for more information on this.
+`do_once` to run again by calling `reset_on_unmount()` on the return value. See `on_unmount` for more information on this.
 
 The example on the right outputs a welcome message once and once only.
 ",

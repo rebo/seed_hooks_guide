@@ -12,11 +12,8 @@ mod page;
 use fixed_vec_deque::FixedVecDeque;
 use generated::css_classes::C;
 use seed::{prelude::*, *};
-use seed_hooks::{
-    clone_state_with_topo_id, execute_and_remove_unmounts, handle_unmount,
-    topo, StateAccess, StateAccessUnmount,
-};
-use wasm_bindgen::JsCast;
+use seed_hooks::*;
+
 const TITLE_SUFFIX: &str = "seedhooks";
 // https://mailtolink.me/
 // const MAIL_TO_REBO: &str = "mailto:rebotfc@gmail.com";

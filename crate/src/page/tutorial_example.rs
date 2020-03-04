@@ -1,7 +1,7 @@
 use crate::{generated::css_classes::C, Msg, Page};
 use seed_hooks::*;
-use comrak::{markdown_to_html, ComrakOptions};
 use seed::{prelude::*, *};
+use web_sys::{HtmlElement, HtmlTextAreaElement};
 
 pub fn view() -> Node<Msg> {
     div![
@@ -39,18 +39,8 @@ pub fn view() -> Node<Msg> {
     ]
 }
 
-fn empty_fn() -> Node<Msg> {
-    empty![]
-}
-
-fn set_scroll(textarea: web_sys::HtmlTextAreaElement, preview: web_sys::HtmlElement) {
-    let scroll_percentage = (textarea.scroll_top() as f64) / (textarea.scroll_height() as f64);
-    let new_scroll_top = (preview.scroll_height() as f64) * scroll_percentage;
-    preview.set_scroll_top(new_scroll_top as i32);
-}
-
-#[topo::nested]
-fn markdown_editor() -> Node<Msg> {
+fn markdown_editor() -> Node<Msg>
+{
     let source = use_state(|| {
         "# Header
 
@@ -67,53 +57,72 @@ fn markdown_editor() -> Node<Msg> {
 * List item
 * List item
 * List item    
-"
-        .to_string()
-    });
-    let preview_el = use_state::<ElRef<web_sys::HtmlElement>, _>(ElRef::default);
-    let textarea_el = use_state::<ElRef<web_sys::HtmlTextAreaElement>, _>(ElRef::default);
+".to_string()});
 
-    let processed_md = markdown_to_html(&source.get(), &ComrakOptions::default());
+    let preview_el = use_state(ElRef::<HtmlElement>::default);
+    let textarea_el = use_state(ElRef::<HtmlTextAreaElement>::default);
 
     div![
-        class![C.flex C.flex_col],
+        class!["flex flex-col"],
         div![
-            class![C.flex C.flex_row],
-            div![class!(C.w_1of2), "Markdown:"],
-            div![class!(C.w_1of2), "Preview:"],
+            class!["flex flex-row"],
+            div![class!["w-1/2"], "Markdown:"],
+            div![class!["w-1/2"], "Preview:"],
         ],
         div![
-            class!["flex" "flex-row" C.h_64],
+            class!["flex flex-row h-64"],
             textarea![
                 el_ref(&textarea_el.get()),
                 bind(At::Value, source),
-                class![C.font_mono C.p_2 C.h_full C.flex_none C.w_1of2 C.border_gray_200 C.border C.shadow_lg],
+                class!["font-mono p-2 h-full flex-none w-1/2 border-gray-200 border shadow-lg"],
                 attrs![At::Type => "textbox"],
-                textarea_el.input_ev(Ev::KeyUp, move |el, _| {
-                    if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-                        set_scroll(textarea, preview);
-                    }
-                }),
-                textarea_el.input_ev(Ev::Scroll, move |el, _| {
-                    if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
-                        set_scroll(textarea, preview);
-                    }
-                })
+                scroll_event_handler(Ev::KeyUp ,textarea_el, preview_el),
+                scroll_event_handler(Ev::Scroll, textarea_el, preview_el),
             ],
             div![
-                class!["md-preview"],
                 el_ref(&preview_el.get()),
-                class![C.overflow_auto C.p_2 C.pl_4 C.h_full C.flex_none C.w_1of2 C.border_gray_200 C.bg_indigo_100 C.border C.shadow_lg],
-                raw!(&processed_md)
+                class!["markdown-body"],
+                class!["overflow-auto p-2 pl-4 h-full flex-none w-1/2 border-gray-200 bg-indigo-100 border shadow-lg"],
+                md!(&source.get())
             ]
         ],
         div![
-            class![C.flex C.justify_end C.pt_2],
+            class!["flex justify-end pt-2"],
             button![
-                class![C.bg_green_400 C.rounded_lg C.p_4 C.m_2],
-                "Submit",
-                mouse_ev(Ev::Click, move |_| Msg::SubmitMarkdownHtml(processed_md))
+                class!["bg-green-400 p-4 m-2"],
+                "Submit (See console log)",
+                mouse_ev(Ev::Click, move |_| {
+                    let markdown_element = preview_el.get().get().expect("markdown-body doesn't exist");
+                    Msg::SubmitMarkdownHtml(markdown_element.inner_html())
+                })
             ]
         ]
     ]
+}
+
+fn scroll_event_handler<Ms>(
+    event: Ev,
+    textarea_el: StateAccess<ElRef<HtmlTextAreaElement>>,
+    preview_el: StateAccess<ElRef<HtmlElement>>,
+) -> EventHandler<Ms>
+where
+    Ms: 'static + Default,
+{
+    textarea_el.input_ev(event, move |el, _| {
+        if let (Some(textarea), Some(preview)) = (el.get(), preview_el.get().get()) {
+            let textarea_scroll_percentage = {
+                let textarea_max_scroll_top = textarea.scroll_height() - textarea.client_height();
+                if textarea_max_scroll_top == 0 {
+                    0.
+                } else {
+                    f64::from(textarea.scroll_top()) / f64::from(textarea_max_scroll_top)
+                }
+            };
+            let new_preview_scroll_top = {
+                let preview_max_scroll_top = preview.scroll_height() - preview.client_height();
+                f64::from(preview_max_scroll_top) * textarea_scroll_percentage
+            };
+            preview.set_scroll_top(new_preview_scroll_top as i32);
+        }
+    })
 }
